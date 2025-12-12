@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useWallet, useConnection } from "@solana/wallet-adapter-react"
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
+import { useWalletModal } from "@solana/wallet-adapter-react-ui"
 import {
   Transaction,
   PublicKey,
@@ -24,6 +25,7 @@ interface SolanaWalletConnectProps {
   onStatusChange: (status: PaymentStatus) => void
   onSuccess: (paymentPayload: string) => void
   onError: (error: string) => void
+  onWalletModalChange?: (isOpen: boolean) => void
 }
 
 export function SolanaWalletConnect({
@@ -32,13 +34,20 @@ export function SolanaWalletConnect({
   onStatusChange,
   onSuccess,
   onError,
+  onWalletModalChange,
 }: SolanaWalletConnectProps) {
   const { connected, publicKey, signTransaction, disconnect } = useWallet()
   const { connection } = useConnection()
+  const { visible: walletModalVisible } = useWalletModal()
 
   const [isSigning, setIsSigning] = useState(false)
 
   const usdcMint = new PublicKey(USDC_MINT[network])
+
+  // Notify parent when wallet modal visibility changes
+  useEffect(() => {
+    onWalletModalChange?.(walletModalVisible)
+  }, [walletModalVisible, onWalletModalChange])
 
   const handlePayment = async () => {
     if (!publicKey || !signTransaction || !paymentRequirements) return

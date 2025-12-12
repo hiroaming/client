@@ -45,10 +45,16 @@ export function X402PaymentModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
+  // Track if Solana wallet modal is open to avoid modal stacking
+  const [walletModalOpen, setWalletModalOpen] = useState(false)
+
   const { getExplorerTxUrl } = useX402Network()
 
   const isEVM = network === "base" || network === "base-sepolia"
   const isSolana = network === "solana" || network === "solana-devnet"
+
+  // Effective open state: hide this modal when wallet modal is open
+  const effectiveOpen = open && !walletModalOpen
 
   // Get network-specific payment requirements
   const networkRequirements = paymentRequirements?.networks?.[network]
@@ -129,7 +135,7 @@ export function X402PaymentModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={effectiveOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Pay with USDC</DialogTitle>
@@ -247,6 +253,7 @@ export function X402PaymentModal({
                   onStatusChange={setStatus}
                   onSuccess={handlePaymentSuccess}
                   onError={handlePaymentError}
+                  onWalletModalChange={setWalletModalOpen}
                 />
               )}
             </>
