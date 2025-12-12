@@ -296,7 +296,7 @@ export default function CheckoutPage() {
         period_num: item.periodNum ?? null,
       }))
 
-      // Get auth token
+      // Get auth token - determine if guest or authenticated
       let accessToken = session?.access_token
       if (user && !accessToken) {
         const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession()
@@ -305,8 +305,13 @@ export default function CheckoutPage() {
         }
       }
 
+      // Determine endpoint: use checkout-x402-guest for unauthenticated users
+      const isGuest = !accessToken
+      const endpoint = isGuest ? "checkout-x402-guest" : "checkout-x402"
+      console.log("[Checkout] x402 mode:", isGuest ? "guest" : "authenticated", "endpoint:", endpoint)
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/checkout-x402`,
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${endpoint}`,
         {
           method: "POST",
           headers: {
