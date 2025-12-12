@@ -96,7 +96,14 @@ export function X402PaymentModal({
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Payment verification failed")
+        // Use user_message from backend if available, otherwise fall back to error
+        const errorMessage = data.user_message || data.error || "Payment verification failed"
+        console.error("[x402] Verification failed:", {
+          error_code: data.error_code,
+          error: data.error,
+          user_message: data.user_message
+        })
+        throw new Error(errorMessage)
       }
 
       setStatus("success")
