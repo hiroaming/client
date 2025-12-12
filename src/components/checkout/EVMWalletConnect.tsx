@@ -64,8 +64,8 @@ export function EVMWalletConnect({
       ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
       : "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 
-  // Write contract hook for ERC-20 transfer
-  const { writeContract, isPending: isWritePending } = useWriteContract()
+  // Write contract hook for ERC-20 transfer - use async version
+  const { writeContractAsync, isPending: isWritePending } = useWriteContract()
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -139,44 +139,38 @@ export function EVMWalletConnect({
         network,
       })
 
-      // Submit transfer transaction - user pays gas
-      writeContract(
-        {
-          address: usdcAddress as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: "transfer",
-          args: [paymentRequirements.payTo as `0x${string}`, amount],
-          chainId: targetChainId,
-        },
-        {
-          onSuccess: (hash) => {
-            console.log("[EVM] Transaction submitted:", hash)
-            setTxHash(hash)
-            onStatusChange("verifying")
-          },
-          onError: (error) => {
-            console.error("[EVM] Transaction error:", error)
-            setIsProcessing(false)
-            onStatusChange("idle")
+      // Submit transfer transaction using async version
+      // writeContractAsync returns a promise that resolves to the hash
+      const hash = await writeContractAsync({
+        address: usdcAddress as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: "transfer",
+        args: [paymentRequirements.payTo as `0x${string}`, amount],
+        chainId: targetChainId,
+      })
 
-            let errorMessage = "Transaction failed"
-            if (error.message.includes("insufficient funds")) {
-              errorMessage = "Insufficient ETH for gas fee"
-            } else if (error.message.includes("user rejected") || error.message.includes("User rejected")) {
-              errorMessage = "Transaction rejected by user"
-            } else if (error.message.includes("transfer amount exceeds balance")) {
-              errorMessage = "Insufficient USDC balance"
-            }
-
-            onError(errorMessage)
-          },
-        }
-      )
+      console.log("[EVM] Transaction submitted:", hash)
+      setTxHash(hash)
+      onStatusChange("verifying")
     } catch (error) {
       console.error("[EVM] Payment error:", error)
       setIsProcessing(false)
       onStatusChange("idle")
-      onError(error instanceof Error ? error.message : "Payment failed")
+
+      let errorMessage = "Transaction failed"
+      if (error instanceof Error) {
+        if (error.message.includes("insufficient funds")) {
+          errorMessage = "Insufficient ETH for gas fee"
+        } else if (error.message.includes("user rejected") || error.message.includes("User rejected")) {
+          errorMessage = "Transaction rejected by user"
+        } else if (error.message.includes("transfer amount exceeds balance")) {
+          errorMessage = "Insufficient USDC balance"
+        } else {
+          errorMessage = error.message
+        }
+      }
+
+      onError(errorMessage)
     }
   }
 
