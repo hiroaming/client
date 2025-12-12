@@ -92,8 +92,9 @@ export function EVMWalletConnect({
     onStatusChange("signing")
 
     try {
-      // Generate random nonce
-      const nonce = keccak256(toHex(Date.now() + Math.random()))
+      // Generate random nonce - must be integer for BigInt conversion
+      const randomSeed = Math.floor(Date.now() * 1000 + Math.random() * 1000000)
+      const nonce = keccak256(toHex(randomSeed))
 
       // Calculate time window (5 minutes)
       const now = Math.floor(Date.now() / 1000)
