@@ -59,11 +59,18 @@ export function SolanaWalletConnect({
       // Parse addresses
       const payToAddress = new PublicKey(paymentRequirements.payTo)
 
+      // Get fee payer from payment requirements (PayAI facilitator)
+      // The facilitator will pay transaction fees and add their signature
+      const feePayerAddress = paymentRequirements.extra?.feePayer
+        ? new PublicKey(paymentRequirements.extra.feePayer)
+        : publicKey // Fallback to user if not specified
+
       console.log("[Solana] Starting payment process...")
       console.log("[Solana] Payment requirements:", {
         payTo: paymentRequirements.payTo,
         maxAmountRequired: paymentRequirements.maxAmountRequired,
         network,
+        feePayer: feePayerAddress.toBase58(),
       })
 
       // Get token accounts
@@ -79,12 +86,12 @@ export function SolanaWalletConnect({
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash()
 
-      // Create transaction - user is fee payer for signing
-      // Facilitator may sponsor fees later if configured
+      // Create transaction with facilitator as fee payer
+      // PayAI facilitator will add their signature and broadcast
       const transaction = new Transaction()
       transaction.recentBlockhash = blockhash
       transaction.lastValidBlockHeight = lastValidBlockHeight
-      transaction.feePayer = publicKey // User pays fees (wallet must be fee payer to sign)
+      transaction.feePayer = feePayerAddress // Facilitator pays fees
 
       // Add compute budget instructions
       transaction.add(
@@ -110,6 +117,7 @@ export function SolanaWalletConnect({
 
       console.log("[Solana] Transaction built:", {
         feePayer: transaction.feePayer?.toBase58(),
+        feePayerIsUser: transaction.feePayer?.equals(publicKey),
         blockhash: transaction.recentBlockhash,
         instructionCount: transaction.instructions.length,
         sourceATA: sourceATA.toBase58(),
