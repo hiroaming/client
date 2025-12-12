@@ -16,7 +16,8 @@ import {
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token"
-import type { NetworkPaymentRequirements, PaymentStatus } from "@/types/x402"
+import type { NetworkPaymentRequirements, PaymentStatus, NetworkType } from "@/types/x402"
+import { NETWORK_TO_CAIP2 } from "@/types/x402"
 import { USDC_MINT } from "@/lib/solana-config"
 
 interface SolanaWalletConnectProps {
@@ -59,17 +60,16 @@ export function SolanaWalletConnect({
       // Parse addresses
       const payToAddress = new PublicKey(paymentRequirements.payTo)
 
-      // Get fee payer from payment requirements (PayAI facilitator)
-      // The facilitator will pay transaction fees and add their signature
-      const feePayerAddress = paymentRequirements.extra?.feePayer
-        ? new PublicKey(paymentRequirements.extra.feePayer)
-        : publicKey // Fallback to user if not specified
+      // For CDP facilitator, user pays their own transaction fees
+      // The facilitator will broadcast the fully-signed transaction
+      const feePayerAddress = publicKey
 
-      console.log("[Solana] Starting payment process...")
+      console.log("[Solana] Starting payment process with CDP facilitator...")
       console.log("[Solana] Payment requirements:", {
         payTo: paymentRequirements.payTo,
         maxAmountRequired: paymentRequirements.maxAmountRequired,
         network,
+        caip2Network: NETWORK_TO_CAIP2[network as NetworkType],
         feePayer: feePayerAddress.toBase58(),
       })
 
@@ -115,7 +115,7 @@ export function SolanaWalletConnect({
         )
       )
 
-      console.log("[Solana] Transaction built:", {
+      console.log("[Solana] Transaction built for CDP facilitator:", {
         feePayer: transaction.feePayer?.toBase58(),
         feePayerIsUser: transaction.feePayer?.equals(publicKey),
         blockhash: transaction.recentBlockhash,
@@ -125,23 +125,24 @@ export function SolanaWalletConnect({
         amount: amount.toString(),
       })
 
-      // Sign transaction
+      // Sign transaction - user signs as both fee payer and token owner
       console.log("[Solana] Requesting wallet signature...")
       const signedTx = await signTransaction(transaction)
       console.log("[Solana] Transaction signed successfully")
 
-      // Serialize to base64
+      // Serialize to base64 - fully signed for CDP facilitator to broadcast
       const serializedTx = signedTx.serialize({
-        requireAllSignatures: false,
-        verifySignatures: false,
+        requireAllSignatures: true,
+        verifySignatures: true,
       })
       const base64Tx = Buffer.from(serializedTx).toString("base64")
 
-      // Create payment payload
+      // Create payment payload with CAIP-2 network format for CDP facilitator
+      const caip2Network = NETWORK_TO_CAIP2[network as NetworkType]
       const paymentPayload = JSON.stringify({
         x402Version: 1,
         scheme: "exact",
-        network,
+        network: caip2Network, // Use CAIP-2 format for CDP
         payload: {
           transaction: base64Tx,
         },

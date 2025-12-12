@@ -13,7 +13,8 @@ import {
 } from "wagmi"
 import { base, baseSepolia } from "wagmi/chains"
 import { keccak256, toHex } from "viem"
-import type { NetworkPaymentRequirements, PaymentStatus } from "@/types/x402"
+import type { NetworkPaymentRequirements, PaymentStatus, NetworkType } from "@/types/x402"
+import { NETWORK_TO_CAIP2 } from "@/types/x402"
 
 interface EVMWalletConnectProps {
   network: "base" | "base-sepolia"
@@ -132,11 +133,12 @@ export function EVMWalletConnect({
         message,
       })
 
-      // Create payment payload
+      // Create payment payload with CAIP-2 network format for CDP facilitator
+      const caip2Network = NETWORK_TO_CAIP2[network as NetworkType]
       const paymentPayload = JSON.stringify({
         x402Version: 1,
         scheme: "exact",
-        network,
+        network: caip2Network, // Use CAIP-2 format for CDP
         payload: {
           signature,
           authorization: {

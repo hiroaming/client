@@ -1,10 +1,34 @@
 // x402 TypeScript Types
 
+// Legacy network types for frontend UI
 export type NetworkType = "base-sepolia" | "base" | "solana-devnet" | "solana"
+
+// CAIP-2 network identifiers for CDP facilitator
+export type Caip2NetworkType =
+  | "eip155:84532"   // Base Sepolia
+  | "eip155:8453"    // Base Mainnet
+  | "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"  // Solana Devnet
+  | "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"  // Solana Mainnet
+
+// Network mapping for conversion between legacy and CAIP-2 formats
+export const NETWORK_TO_CAIP2: Record<NetworkType, Caip2NetworkType> = {
+  "base-sepolia": "eip155:84532",
+  "base": "eip155:8453",
+  "solana-devnet": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+  "solana": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+}
+
+export const CAIP2_TO_NETWORK: Record<Caip2NetworkType, NetworkType> = {
+  "eip155:84532": "base-sepolia",
+  "eip155:8453": "base",
+  "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1": "solana-devnet",
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "solana",
+}
 
 export interface NetworkPaymentRequirements {
   scheme: "exact"
-  network: string
+  network: string // CAIP-2 format for CDP
+  legacyNetwork?: string // Legacy format for backward compatibility
   maxAmountRequired: string
   resource: string
   description: string
@@ -15,7 +39,7 @@ export interface NetworkPaymentRequirements {
   extra?: {
     name?: string
     version?: string
-    feePayer?: string // For Solana
+    feePayer?: string // For Solana (legacy PayAI)
   }
 }
 
