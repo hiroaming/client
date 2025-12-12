@@ -25,6 +25,7 @@ export interface PaymentRequirements {
   amount_usd: number
   amount_usdc_atomic: string
   expires_at: string
+  payment_id?: string  // Some backends require this
   networks: {
     [key: string]: NetworkPaymentRequirements
   }
@@ -150,6 +151,7 @@ export function transformPaymentRequirements(
       amount_usd: payment_requirements.amount_usd || total_usd,
       amount_usdc_atomic: payment_requirements.amount_usdc_atomic || total_atomic,
       expires_at: payment_requirements.expires_at || new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      payment_id: (payment_requirements as any).payment_id || (backendResponse as any).payment_id,
       networks: payment_requirements.networks,
     }
   }

@@ -63,6 +63,25 @@ export function X402PaymentModal({
     setStatus("verifying")
 
     try {
+      // Parse the payment payload
+      let parsedPayload
+      try {
+        parsedPayload = JSON.parse(paymentPayload)
+      } catch (parseError) {
+        console.error("[x402] Failed to parse payment payload:", parseError)
+        throw new Error("Invalid payment payload format")
+      }
+
+      // Build the request body
+      const requestBody = {
+        order_id: orderId,
+        payment_id: paymentRequirements?.payment_id || orderId,
+        network,
+        payment_payload: parsedPayload,
+      }
+
+      console.log("[x402] Verify-settle request:", JSON.stringify(requestBody, null, 2))
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/x402-verify-settle`,
         {
@@ -70,11 +89,7 @@ export function X402PaymentModal({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            order_id: orderId,
-            network,
-            payment_payload: JSON.parse(paymentPayload),
-          }),
+          body: JSON.stringify(requestBody),
         }
       )
 
