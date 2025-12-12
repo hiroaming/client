@@ -66,8 +66,10 @@ export function SolanaWalletConnect({
       const sourceATA = await getAssociatedTokenAddress(usdcMint, publicKey)
       const destATA = await getAssociatedTokenAddress(usdcMint, payToAddress)
 
-      // Parse amount (USDC has 6 decimals)
-      const amount = BigInt(paymentRequirements.maxAmountRequired)
+      // Parse amount (USDC has 6 decimals) - ensure it's an integer before BigInt conversion
+      const amountString = paymentRequirements.maxAmountRequired
+      const amountNumber = Math.floor(Number(amountString))
+      const amount = BigInt(amountNumber)
 
       // Get recent blockhash
       const { blockhash, lastValidBlockHeight } =

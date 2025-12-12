@@ -100,8 +100,10 @@ export function EVMWalletConnect({
       const validAfter = now - 60 // 1 minute ago (for clock skew)
       const validBefore = now + 300 // 5 minutes from now
 
-      // Parse amount
-      const amount = BigInt(paymentRequirements.maxAmountRequired)
+      // Parse amount - ensure it's an integer before BigInt conversion
+      const amountString = paymentRequirements.maxAmountRequired
+      const amountNumber = Math.floor(Number(amountString))
+      const amount = BigInt(amountNumber)
 
       // Create authorization message
       const message = {

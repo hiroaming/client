@@ -79,3 +79,41 @@ export type PaymentStatus =
   | "settling"
   | "success"
   | "error"
+
+// Raw backend response format (what the edge function returns)
+export interface X402CheckoutBackendResponse {
+  success: boolean
+  order_id: string
+  order_number: string
+  total_usd: number
+  total_atomic: string
+  network: string
+  payment_requirements: {
+    x402Version: number
+    accepts: NetworkPaymentRequirements[]
+  }
+}
+
+/**
+ * Transform backend checkout response to frontend PaymentRequirements format
+ */
+export function transformPaymentRequirements(
+  backendResponse: X402CheckoutBackendResponse
+): PaymentRequirements {
+  const { order_id, order_number, total_usd, total_atomic, payment_requirements } = backendResponse
+
+  // Convert accepts array to networks object
+  const networks: { [key: string]: NetworkPaymentRequirements } = {}
+  for (const req of payment_requirements.accepts) {
+    networks[req.network] = req
+  }
+
+  return {
+    order_id,
+    order_number,
+    amount_usd: total_usd,
+    amount_usdc_atomic: total_atomic,
+    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 min default
+    networks,
+  }
+}

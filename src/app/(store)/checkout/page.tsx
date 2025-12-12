@@ -42,7 +42,8 @@ import { isUnlimitedPackage, getDataTypeLabel } from "@/types/location"
 import { PaymentMethodSelector, type PaymentMethod } from "@/components/checkout/PaymentMethodSelector"
 import { X402PaymentModal } from "@/components/checkout/X402PaymentModal"
 import { useX402Availability } from "@/hooks/use-x402-availability"
-import type { PaymentRequirements } from "@/types/x402"
+import type { PaymentRequirements, X402CheckoutBackendResponse } from "@/types/x402"
+import { transformPaymentRequirements } from "@/types/x402"
 
 const checkoutSchema = z.object({
   email: z.string().email("Email tidak valid"),
@@ -337,7 +338,9 @@ export default function CheckoutPage() {
 
       // Open x402 payment modal
       setX402OrderId(data.order_id)
-      setPaymentRequirements(data.payment_requirements)
+      // Transform backend response format to frontend format
+      const transformedRequirements = transformPaymentRequirements(data as X402CheckoutBackendResponse)
+      setPaymentRequirements(transformedRequirements)
       setX402ModalOpen(true)
     } catch (error) {
       console.error("[Checkout] x402 error:", error)

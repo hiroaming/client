@@ -73,7 +73,7 @@ export function X402PaymentModal({
           body: JSON.stringify({
             order_id: orderId,
             network,
-            payment: paymentPayload,
+            payment_payload: JSON.parse(paymentPayload),
           }),
         }
       )

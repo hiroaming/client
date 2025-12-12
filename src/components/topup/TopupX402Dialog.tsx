@@ -13,7 +13,8 @@ import { Loader2, Package, ArrowRight, AlertCircle } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider"
 import { X402PaymentModal } from "@/components/checkout/X402PaymentModal"
 import { useCurrencyStore } from "@/stores/currency-store"
-import type { PaymentRequirements } from "@/types/x402"
+import type { PaymentRequirements, X402CheckoutBackendResponse } from "@/types/x402"
+import { transformPaymentRequirements } from "@/types/x402"
 
 interface TopupPackage {
   package_code: string
@@ -167,7 +168,9 @@ export function TopupX402Dialog({
 
       // Open x402 payment modal
       setX402OrderId(data.order_id)
-      setPaymentRequirements(data.payment_requirements)
+      // Transform backend response format to frontend format
+      const transformedRequirements = transformPaymentRequirements(data as X402CheckoutBackendResponse)
+      setPaymentRequirements(transformedRequirements)
       setX402ModalOpen(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed")
