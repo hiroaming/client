@@ -14,7 +14,10 @@ import {
 import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddress,
+  getAccount,
+  createAssociatedTokenAccountInstruction,
   TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token"
 import type { NetworkPaymentRequirements, PaymentStatus, NetworkType } from "@/types/x402"
 import { NETWORK_TO_CAIP2 } from "@/types/x402"
@@ -77,6 +80,16 @@ export function SolanaWalletConnect({
       const sourceATA = await getAssociatedTokenAddress(usdcMint, publicKey)
       const destATA = await getAssociatedTokenAddress(usdcMint, payToAddress)
 
+      // Check if destination ATA exists - if not, we need to create it
+      let destATAExists = false
+      try {
+        await getAccount(connection, destATA)
+        destATAExists = true
+        console.log("[Solana] Destination ATA exists:", destATA.toBase58())
+      } catch {
+        console.log("[Solana] Destination ATA does not exist, will create:", destATA.toBase58())
+      }
+
       // Parse amount (USDC has 6 decimals) - ensure it's an integer before BigInt conversion
       const amountString = paymentRequirements.maxAmountRequired
       const amountNumber = Math.floor(Number(amountString))
@@ -86,20 +99,35 @@ export function SolanaWalletConnect({
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash()
 
-      // Create transaction with facilitator as fee payer
-      // PayAI facilitator will add their signature and broadcast
+      // Create transaction with user as fee payer
       const transaction = new Transaction()
       transaction.recentBlockhash = blockhash
       transaction.lastValidBlockHeight = lastValidBlockHeight
-      transaction.feePayer = feePayerAddress // Facilitator pays fees
+      transaction.feePayer = feePayerAddress
 
-      // Add compute budget instructions
+      // Add compute budget instructions (increase units if creating ATA)
       transaction.add(
-        ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 })
+        ComputeBudgetProgram.setComputeUnitLimit({ units: destATAExists ? 100_000 : 150_000 })
       )
       transaction.add(
         ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1000 })
       )
+
+      // Create destination ATA if it doesn't exist
+      // This is required for the transfer to succeed
+      if (!destATAExists) {
+        console.log("[Solana] Adding createAssociatedTokenAccount instruction")
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            publicKey, // payer (user pays for account creation)
+            destATA, // associated token account address
+            payToAddress, // owner of the new account (merchant)
+            usdcMint, // token mint
+            TOKEN_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID
+          )
+        )
+      }
 
       // Add transfer instruction
       transaction.add(
@@ -115,11 +143,12 @@ export function SolanaWalletConnect({
         )
       )
 
-      console.log("[Solana] Transaction built for CDP facilitator:", {
+      console.log("[Solana] Transaction built for native verification:", {
         feePayer: transaction.feePayer?.toBase58(),
         feePayerIsUser: transaction.feePayer?.equals(publicKey),
         blockhash: transaction.recentBlockhash,
         instructionCount: transaction.instructions.length,
+        creatingDestATA: !destATAExists,
         sourceATA: sourceATA.toBase58(),
         destATA: destATA.toBase58(),
         amount: amount.toString(),
