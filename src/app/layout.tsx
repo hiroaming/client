@@ -1,15 +1,15 @@
-import type { Metadata } from "next"
-import { Figtree } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/providers/theme-provider"
-import { AuthProvider } from "@/providers/auth-provider"
-import { Web3Provider } from "@/providers/web3-provider"
-import { Toaster } from "@/components/ui/toast"
+import type { Metadata } from "next";
+import { Figtree } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { AuthProvider } from "@/providers/auth-provider";
+import { Web3Provider } from "@/providers/web3-provider";
+import { Toaster } from "@/components/ui/toast";
 
 const figtree = Figtree({
   variable: "--font-figtree",
   subsets: ["latin"],
-})
+});
 
 export const metadata: Metadata = {
   title: {
@@ -47,12 +47,12 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
@@ -66,13 +66,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <Web3Provider>
-              {children}
-            </Web3Provider>
+            <Web3Provider>{children}</Web3Provider>
             <Toaster position="top-right" />
           </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -1,33 +1,41 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/providers/auth-provider"
-import { toast } from "sonner"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/providers/auth-provider";
+import { toast } from "sonner";
+import { Header } from "@/components/layout/header";
 
 const loginSchema = z.object({
   email: z.string().email("Email tidak valid"),
   password: z.string().min(6, "Password minimal 6 karakter"),
-})
+});
 
-type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { signIn, signInWithGoogle } = useAuth()
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const router = useRouter();
+  const { signIn, signInWithGoogle } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const {
     register,
@@ -35,39 +43,41 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const { error } = await signIn(data.email, data.password)
+      const { error } = await signIn(data.email, data.password);
       if (error) {
-        toast.error(error.message || "Gagal masuk. Periksa email dan password Anda.")
-        return
+        toast.error(
+          error.message || "Gagal masuk. Periksa email dan password Anda."
+        );
+        return;
       }
-      toast.success("Berhasil masuk!")
-      router.push("/")
-      router.refresh()
+      toast.success("Berhasil masuk!");
+      router.push("/");
+      router.refresh();
     } catch {
-      toast.error("Terjadi kesalahan. Silakan coba lagi.")
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true)
+    setIsGoogleLoading(true);
     try {
-      const { error } = await signInWithGoogle()
+      const { error } = await signInWithGoogle();
       if (error) {
-        toast.error("Gagal masuk dengan Google")
+        toast.error("Gagal masuk dengan Google");
       }
     } catch {
-      toast.error("Terjadi kesalahan. Silakan coba lagi.")
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
-      setIsGoogleLoading(false)
+      setIsGoogleLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -170,7 +180,9 @@ export default function LoginPage() {
               </Button>
             </div>
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
@@ -189,5 +201,5 @@ export default function LoginPage() {
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

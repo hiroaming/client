@@ -45,7 +45,7 @@ export function PopularDestinationsSection(props: Props) {
   );
 }
 
-export async function PopularDestinationsSectionAsync({
+async function PopularDestinationsSectionAsync({
   disableRegions,
   disableCountries,
   disableGlobal,

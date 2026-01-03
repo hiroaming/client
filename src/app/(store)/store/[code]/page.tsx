@@ -1,42 +1,42 @@
-import { Suspense } from "react"
-import { Metadata } from "next"
-import { notFound } from "next/navigation"
-import Image from "next/image"
-import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
-import { createClient } from "@/lib/supabase/server"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { getCountryByCode, getPackagesForCountry } from "@/services/locations"
-import { CountryPackages } from "./country-packages"
-import type { EsimPackage } from "@/types/database"
-import type { PriceSchedule } from "@/lib/price-utils"
-
-export const dynamic = "force-dynamic"
+import { Suspense } from "react";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getCountryByCode, getPackagesForCountry } from "@/services/locations";
+import { CountryPackages } from "./country-packages";
+import type { EsimPackage } from "@/types/database";
+import type { PriceSchedule } from "@/lib/price-utils";
 
 interface PageProps {
-  params: Promise<{ code: string }>
+  params: Promise<{ code: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { code } = await params
-  const country = await getCountryByCode(code.toUpperCase())
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { code } = await params;
+  const country = await getCountryByCode(code.toUpperCase());
 
   if (!country) {
     return {
       title: "Negara tidak ditemukan - HIROAM",
-    }
+    };
   }
 
   return {
     title: `Paket eSIM ${country.name} - HIROAM`,
     description: `Beli paket eSIM untuk ${country.name}. Mulai dari harga terjangkau dengan opsi unlimited tersedia.`,
-  }
+  };
 }
 
 async function getActivePriceSchedules(): Promise<PriceSchedule[]> {
-  const supabase = await createClient()
-  const now = new Date().toISOString()
+  const supabase = await createClient();
+  const now = new Date().toISOString();
 
   const { data, error } = await supabase
     .from("price_schedules")
@@ -44,14 +44,14 @@ async function getActivePriceSchedules(): Promise<PriceSchedule[]> {
     .eq("is_active", true)
     .lte("starts_at", now)
     .gte("ends_at", now)
-    .order("priority", { ascending: false })
+    .order("priority", { ascending: false });
 
   if (error) {
-    console.error("Error fetching price schedules:", error)
-    return []
+    console.error("Error fetching price schedules:", error);
+    return [];
   }
 
-  return (data as PriceSchedule[]) || []
+  return (data as PriceSchedule[]) || [];
 }
 
 function CountrySkeleton() {
@@ -71,21 +71,21 @@ function CountrySkeleton() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 export default async function CountryDetailPage({ params }: PageProps) {
-  const { code } = await params
-  const upperCode = code.toUpperCase()
+  const { code } = await params;
+  const upperCode = code.toUpperCase();
 
   const [country, packages, priceSchedules] = await Promise.all([
     getCountryByCode(upperCode),
     getPackagesForCountry(upperCode),
     getActivePriceSchedules(),
-  ])
+  ]);
 
   if (!country) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -103,7 +103,10 @@ export default async function CountryDetailPage({ params }: PageProps) {
         <div className="flex items-center gap-4 mb-8">
           <div className="relative w-16 h-12 rounded-lg overflow-hidden bg-muted shadow-sm">
             <Image
-              src={country.flagUrl || `/img/flags/${country.code.toLowerCase()}.png`}
+              src={
+                country.flagUrl ||
+                `/img/flags/${country.code.toLowerCase()}.png`
+              }
               alt={country.name}
               fill
               className="object-cover"
@@ -126,5 +129,5 @@ export default async function CountryDetailPage({ params }: PageProps) {
         />
       </div>
     </Suspense>
-  )
+  );
 }
