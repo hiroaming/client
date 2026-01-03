@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { DeviceCompatibilityContent } from "./device-compatibility-content";
-import { getCompatibleDevices, groupDevicesByBrand } from "@/lib/device-compatibility";
+import { getBrandMeta, getCompatibleDevices, groupDevicesByBrand } from "@/lib/device-compatibility";
 import {
   getCountriesWithPackages,
   getRegionsWithPackages,
@@ -12,19 +12,18 @@ export const metadata: Metadata = {
 }
 
 export default async function DeviceCompatibilityPage() {
-  const [devices, countries, regions] = await Promise.all([
+  const [devices, countries, regions, meta] = await Promise.all([
     Promise.resolve(getCompatibleDevices()),
     getCountriesWithPackages(),
     getRegionsWithPackages(),
+    Promise.resolve(getBrandMeta()),
   ]);
-  
-  const devicesByBrand = groupDevicesByBrand(devices);
 
   return (
     <DeviceCompatibilityContent
-      devicesByBrand={devicesByBrand}
       countries={countries}
       regions={regions}
+      brandMeta={meta}
     />
   );
 }

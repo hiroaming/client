@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   findBrandBySlug,
+  getBrandMeta,
   getCompatibleDevices,
   groupDevicesByBrand,
 } from "@/lib/device-compatibility";
@@ -38,9 +39,11 @@ export default async function DeviceCompatibilityBrandPage({
   const devices = getCompatibleDevices();
   const byBrand = groupDevicesByBrand(devices);
   const brand = findBrandBySlug(Object.keys(byBrand), brandSlug);
-  if (!brand) notFound();
+  const meta = getBrandMeta();
+  const brandMeta = meta.find((m) => m.key === brand);
+  if (!brand || !brandMeta) notFound();
 
-  return <BrandDetailContent brand={brand} devices={byBrand[brand]} />;
+  return <BrandDetailContent brand={brand} devices={byBrand[brand]} brandMeta={brandMeta} />;
 }
 
 

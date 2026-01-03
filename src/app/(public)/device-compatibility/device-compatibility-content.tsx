@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toSlug } from "@/lib/device-compatibility";
+import { BrandMeta, getBrandMeta, toSlug } from "@/lib/device-compatibility";
 import { CTASection } from "@/components/landing/cta-section";
 import { FAQSection } from "@/components/landing/faq-section";
 import { PopularDestinations } from "@/components/store/popular-destinations";
@@ -21,8 +21,6 @@ import type {
   LocationWithPackageCount,
   RegionWithPackageCount,
 } from "@/services/locations";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 // Local type definition for compatible devices (no database table exists)
 interface CompatibleDevice {
@@ -33,48 +31,17 @@ interface CompatibleDevice {
 }
 
 interface DeviceCompatibilityContentProps {
-  devicesByBrand: Record<string, CompatibleDevice[]>;
   countries: LocationWithPackageCount[];
   regions: RegionWithPackageCount[];
+  brandMeta: BrandMeta[];
 }
 
 export function DeviceCompatibilityContent({
-  devicesByBrand,
   countries,
   regions,
+  brandMeta,
 }: DeviceCompatibilityContentProps) {
   const [search, setSearch] = useState("");
-
-  const filteredBrands = Object.entries(devicesByBrand).reduce(
-    (acc, [brand, devices]) => {
-      if (search) {
-        const searchLower = search.toLowerCase();
-        const filteredDevices = devices.filter(
-          (device) =>
-            device.brand.toLowerCase().includes(searchLower) ||
-            device.model.toLowerCase().includes(searchLower)
-        );
-        if (filteredDevices.length > 0) {
-          acc[brand] = filteredDevices;
-        }
-      } else {
-        acc[brand] = devices;
-      }
-      return acc;
-    },
-    {} as Record<string, CompatibleDevice[]>
-  );
-
-  const brands = Object.keys(filteredBrands).sort();
-
-  const brandMeta: Record<string, { title: string; logoText: string }> = {
-    Apple: { title: "iPhone", logoText: "apple" },
-    Google: { title: "Google Pixel", logoText: "pixel" },
-    Samsung: { title: "Samsung", logoText: "samsung" },
-    Huawei: { title: "Huawei", logoText: "huawei" },
-    Oppo: { title: "Oppo", logoText: "oppo" },
-    Xiaomi: { title: "Xiaomi", logoText: "xiaomi" },
-  };
 
   return (
     <div className="w-full flex-col">
@@ -123,27 +90,22 @@ export function DeviceCompatibilityContent({
           </div>
 
           <div className="mx-auto mt-10 max-w-4xl">
-            <BorderedContainer innerClassName="p-4 md:p-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {brands.map((brand) => {
-                  const meta = brandMeta[brand] ?? {
-                    title: brand,
-                    logoText: brand,
-                  };
-
+            <BorderedContainer>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {brandMeta.map((meta) => {
                   return (
                     <Link
-                      key={brand}
-                      href={`/device-compatibility/${toSlug(brand)}`}
+                      key={meta.key}
+                      href={`/device-compatibility/${toSlug(meta.key)}`}
                       className="group block"
                     >
                       <div className="h-full rounded-3xl border border-border bg-white p-6 transition-shadow group-hover:shadow-sm">
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-h-8 text-sm font-medium text-muted-foreground">
-                            <FontAwesomeIcon
-                              // icon={`fa-brands fa-${meta.logoText}` as IconProp}
-                              icon={"fa-brands fa-apple" as IconProp}
-                              className="w-4 h-4"
+                            <img
+                              src={meta.icon}
+                              alt={`${meta.title} logo`}
+                              className={meta.className}
                             />
                           </div>
                           <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-muted-foreground">

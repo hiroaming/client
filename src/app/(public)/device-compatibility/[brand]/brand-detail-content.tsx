@@ -4,16 +4,19 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { BorderedContainer } from "@/components/bordered-container";
 import { Button } from "@/components/ui/button";
-import type { CompatibleDevice } from "@/lib/device-compatibility";
+import type { BrandMeta, CompatibleDevice } from "@/lib/device-compatibility";
+import Image from "next/image";
 
 export type BrandDetailContentProps = {
   brand: string;
   devices: CompatibleDevice[];
+  brandMeta: BrandMeta;
 };
 
 export function BrandDetailContent({
   brand,
   devices,
+  brandMeta,
 }: BrandDetailContentProps) {
   const models = [...devices]
     .filter((d) => d.is_compatible)
@@ -24,11 +27,11 @@ export function BrandDetailContent({
   const left = models.slice(0, half);
   const right = models.slice(half);
 
-  const brandTitle = brand === "Apple" ? "Iphone" : brand;
+  const brandTitle = brandMeta.title;
   const brandMark = brand === "Apple" ? "" : brand.slice(0, 2).toUpperCase();
 
   const introText =
-    brand === "Apple"
+    brandMeta.key === "Apple"
       ? "Apple is one of the phone makers that tapped into the eSIM technology. Since 2018, all Apple phones have had eSIM capability. Here are Apple products that support eSIM:"
       : `${brand} is one of the phone makers that supports eSIM technology. Here are ${brand} devices that support eSIM:`;
 
@@ -75,8 +78,8 @@ export function BrandDetailContent({
               </Button>
 
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg font-semibold text-foreground">
-                  {brandMark}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-semibold">
+                  <img src={brandMeta.icon} alt={`${brandMeta.title} logo`} className={brandMeta.className} />
                 </div>
                 <h1 className="text-2xl font-medium md:text-3xl">
                   {brandTitle}
