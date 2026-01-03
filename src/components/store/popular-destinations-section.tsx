@@ -4,14 +4,16 @@ import {
   getCountriesWithPackages,
   getRegionsWithPackages,
 } from "@/services/locations";
-import { PopularDestinations } from "./popular-destinations";
+import {
+  PopularDestinationHeader,
+  PopularDestinations,
+} from "./popular-destinations";
 
 function PopularDestinationsSkeleton() {
   return (
     <section className="mb-12">
       <div className="mb-6">
-        <Skeleton className="h-12 w-64 mb-2" />
-        <Skeleton className="h-6 w-96" />
+        <PopularDestinationHeader />
       </div>
       <div className="flex gap-3 mb-6">
         <Skeleton className="h-10 w-24 rounded-full" />
@@ -27,16 +29,43 @@ function PopularDestinationsSkeleton() {
   );
 }
 
-export async function PopularDestinationsSection() {
-  const [countries, regions] = await Promise.all([
-    getCountriesWithPackages(),
-    getRegionsWithPackages(),
-  ]);
+type Props = {
+  disableRegions?: boolean;
+  disableCountries?: boolean;
+  disableGlobal?: boolean;
+  innerClassName?: string;
+  borderClassName?: string;
+};
 
+export function PopularDestinationsSection(props: Props) {
   return (
     <Suspense fallback={<PopularDestinationsSkeleton />}>
-      <PopularDestinations countries={countries} regions={regions} />
+      <PopularDestinationsSectionAsync {...props} />
     </Suspense>
   );
 }
 
+export async function PopularDestinationsSectionAsync({
+  disableRegions,
+  disableCountries,
+  disableGlobal,
+  innerClassName,
+  borderClassName,
+}: Props) {
+  const [countries, regions] = await Promise.all([
+    disableCountries ? Promise.resolve([]) : getCountriesWithPackages(),
+    disableRegions ? Promise.resolve([]) : getRegionsWithPackages(),
+  ]);
+
+  const globalCountries = disableGlobal ? [] : countries;
+
+  return (
+    <PopularDestinations
+      countries={countries}
+      regions={regions}
+      globalCountries={globalCountries}
+      innerClassName={innerClassName}
+      borderClassName={borderClassName}
+    />
+  );
+}

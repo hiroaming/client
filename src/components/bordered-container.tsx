@@ -33,7 +33,7 @@ export function BorderedContainer({
       className={cn("border border-border bg-white p-1 rounded-4xl", className)}
     >
       <div className={cn("p-2 bg-gray-100 rounded-3xl", innerClassName)}>
-        {children}
+        <div className="bg-white rounded-3xl">{children}</div>
       </div>
     </div>
   );

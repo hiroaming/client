@@ -1,19 +1,16 @@
-import { Suspense } from "react"
-import { Metadata } from "next"
-import { StoreContent } from "./store-content"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  getCountriesWithPackages,
-  getRegionsWithPackages,
-} from "@/services/locations"
+import { Suspense } from "react";
+import { Metadata } from "next";
+import { StoreContent } from "./store-content";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Force dynamic rendering to always get fresh data
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Store - Pilih Destinasi eSIM",
-  description: "Pilih negara atau wilayah untuk membeli paket eSIM perjalanan Anda.",
-}
+  description:
+    "Pilih negara atau wilayah untuk membeli paket eSIM perjalanan Anda.",
+};
 
 function StoreSkeleton() {
   return (
@@ -34,21 +31,13 @@ function StoreSkeleton() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 export default async function StorePage() {
-  const [countries, regions] = await Promise.all([
-    getCountriesWithPackages(),
-    getRegionsWithPackages(),
-  ])
-
   return (
     <Suspense fallback={<StoreSkeleton />}>
-      <StoreContent
-        countries={countries}
-        regions={regions}
-      />
+      <StoreContent />
     </Suspense>
-  )
+  );
 }

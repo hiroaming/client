@@ -48,9 +48,14 @@ export function EVMWalletConnect({
 }: EVMWalletConnectProps) {
   const { address, isConnected } = useAccount()
   const { connect, connectors, isPending: isConnecting } = useConnect()
-  const { disconnect } = useDisconnect()
+  const { disconnect: disconnectFn } = useDisconnect()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
+
+  // Wrap disconnect in useCallback
+  const disconnect = useCallback(() => {
+    disconnectFn()
+  }, [disconnectFn])
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
@@ -178,13 +183,13 @@ export function EVMWalletConnect({
     }
   }
 
-  const handleSwitchChain = async () => {
+  const handleSwitchChain = useCallback(async () => {
     try {
       switchChain({ chainId: targetChainId })
     } catch {
       onError("Failed to switch network")
     }
-  }
+  }, [switchChain, targetChainId, onError])
 
   const handlePayment = async () => {
     if (!address || !paymentRequirements) return
@@ -243,14 +248,19 @@ export function EVMWalletConnect({
     }
   }
 
+  // Wrap handleSwitchChain in useCallback
+  const handleSwitchChainCallback = useCallback(() => {
+    handleSwitchChain()
+  }, [handleSwitchChain])
+
   // Auto-switch chain when connected but on wrong chain
   useEffect(() => {
     if (isConnected && !isCorrectChain) {
       // Small delay to ensure stable state
-      const timer = setTimeout(handleSwitchChain, 500)
+      const timer = setTimeout(handleSwitchChainCallback, 500)
       return () => clearTimeout(timer)
     }
-  }, [isConnected, isCorrectChain])
+  }, [isConnected, isCorrectChain, handleSwitchChainCallback])
 
   const isLoading = isProcessing || isWritePending || isConfirming
 

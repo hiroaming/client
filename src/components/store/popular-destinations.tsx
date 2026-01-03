@@ -11,10 +11,14 @@ import type {
   LocationWithPackageCount,
   RegionWithPackageCount,
 } from "@/services/locations";
+import { cn } from "@/lib/utils";
 
 interface PopularDestinationsProps {
   countries: LocationWithPackageCount[];
   regions: RegionWithPackageCount[];
+  globalCountries: LocationWithPackageCount[];
+  innerClassName?: string;
+  borderClassName?: string;
 }
 
 function RegionDestinationCard({
@@ -79,50 +83,53 @@ function RegionDestinationCard({
 export function PopularDestinations({
   countries,
   regions,
+  innerClassName,
+  globalCountries,
+  borderClassName,
 }: PopularDestinationsProps) {
   // Get popular countries
-  const popularCountries = useMemo(() => {
-    return countries.filter((c) => c.popular).slice(0, 9);
-  }, [countries]);
+  const popularCountries = countries.filter((c) => c.popular).slice(0, 9);
 
   // Get all regions
-  const allRegions = useMemo(() => {
-    return regions;
-  }, [regions]);
+  const allRegions = regions;
 
   // Get all countries for Global tab
-  const allCountries = useMemo(() => {
-    return countries;
-  }, [countries]);
+  const allCountries = globalCountries;
+
+  const isRegionVisible = allRegions.length > 0;
+  const isCountryVisible = popularCountries.length > 0;
+  const isGlobalVisible = allCountries.length > 0;
+
+  const isHideTabs =
+    [isCountryVisible, isRegionVisible, isGlobalVisible].filter(Boolean)
+      .length === 1;
 
   return (
-    <section className="mb-12" id="destinations">
-      <div className="mb-6">
-        <h2 className="text-5xl font-normal leading-12 tracking-normal">
-          <span className="text-primary">Popular</span>{" "}
-          <span className="text-foreground">Destination</span>
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Get connected instantly in your favorite travel destinations
-        </p>
-      </div>
+    <section id="destinations container mx-auto">
+      {PopularDestinationHeader()}
 
       <Tabs defaultValue="countries">
-        <TabsList className="h-auto bg-transparent p-0 gap-3">
+        <TabsList
+          className="h-auto bg-transparent p-0 gap-3"
+          hidden={isHideTabs}
+        >
           <TabsTrigger
             value="countries"
+            hidden={!isCountryVisible}
             className="rounded-full px-5 py-2 border border-border data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Countries
           </TabsTrigger>
           <TabsTrigger
             value="regions"
+            hidden={!isRegionVisible}
             className="rounded-full px-5 py-2 border border-border data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Regions
           </TabsTrigger>
           <TabsTrigger
             value="global"
+            hidden={!isGlobalVisible}
             className="rounded-full px-5 py-2 border border-border data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Global
@@ -131,8 +138,8 @@ export function PopularDestinations({
 
         <TabsContent value="countries" className="mt-6">
           <BorderedContainer
-            className="border-primary bg-primary hidden md:block"
-            innerClassName="bg-primary"
+            className={cn("hidden md:block", borderClassName)}
+            innerClassName={innerClassName}
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {popularCountries.map((country) => (
@@ -148,8 +155,8 @@ export function PopularDestinations({
             </div>
           </BorderedContainer>
           <BorderedContainer
-            className="border-primary bg-primary block md:hidden"
-            innerClassName="bg-primary"
+            className={cn("block md:hidden", borderClassName)}
+            innerClassName={innerClassName}
           >
             <div className="grid gap-4 grid-cols-1">
               {popularCountries.slice(0, 3).map((country) => (
@@ -168,8 +175,8 @@ export function PopularDestinations({
 
         <TabsContent value="regions" className="mt-6">
           <BorderedContainer
-            className="border-primary bg-primary"
-            innerClassName="bg-primary"
+            className={borderClassName}
+            innerClassName={innerClassName}
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {allRegions.map((region) => (
@@ -187,8 +194,8 @@ export function PopularDestinations({
 
         <TabsContent value="global" className="mt-6">
           <BorderedContainer
-            className="border-primary bg-primary"
-            innerClassName="bg-primary"
+            className={borderClassName}
+            innerClassName={innerClassName}
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {allCountries.map((country) => (
@@ -209,3 +216,16 @@ export function PopularDestinations({
   );
 }
 
+export function PopularDestinationHeader() {
+  return (
+    <div className="mb-6">
+      <h2 className="text-5xl font-normal leading-12 tracking-normal">
+        <span className="text-primary">Popular</span>{" "}
+        <span className="text-foreground">Destination</span>
+      </h2>
+      <p className="mt-2 text-muted-foreground">
+        Get connected instantly in your favorite travel destinations
+      </p>
+    </div>
+  );
+}

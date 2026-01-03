@@ -42,7 +42,7 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section className="py-20 bg-background">
+    <section>
       <div className="container mx-auto px-4">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
           {/* Left */}

@@ -154,7 +154,7 @@ export function StoreHero({
           "linear-gradient(180deg, rgba(255, 255, 255, 1) 52%, rgba(206, 255, 243, 1) 100%)",
       }}
     >
-      <div className="relative overflow-hidden rounded-3xl bg-black text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-black text-white max-w-5xl mx-auto">
         <DotPattern />
 
         {/* Pattern SVG in bottom-left (reuses CTA motif) */}

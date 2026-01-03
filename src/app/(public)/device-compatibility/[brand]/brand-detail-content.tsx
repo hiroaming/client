@@ -5,12 +5,18 @@ import { ArrowLeft } from "lucide-react";
 import { BorderedContainer } from "@/components/bordered-container";
 import { Button } from "@/components/ui/button";
 import type { BrandMeta, CompatibleDevice } from "@/lib/device-compatibility";
-import Image from "next/image";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 export type BrandDetailContentProps = {
   brand: string;
   devices: CompatibleDevice[];
-  brandMeta: BrandMeta;
+  brandMeta?: BrandMeta;
 };
 
 export function BrandDetailContent({
@@ -18,25 +24,8 @@ export function BrandDetailContent({
   devices,
   brandMeta,
 }: BrandDetailContentProps) {
-  const models = [...devices]
-    .filter((d) => d.is_compatible)
-    .map((d) => d.model)
-    .sort((a, b) => a.localeCompare(b));
-
-  const half = Math.ceil(models.length / 2);
-  const left = models.slice(0, half);
-  const right = models.slice(half);
-
-  const brandTitle = brandMeta.title;
-  const brandMark = brand === "Apple" ? "" : brand.slice(0, 2).toUpperCase();
-
-  const introText =
-    brandMeta.key === "Apple"
-      ? "Apple is one of the phone makers that tapped into the eSIM technology. Since 2018, all Apple phones have had eSIM capability. Here are Apple products that support eSIM:"
-      : `${brand} is one of the phone makers that supports eSIM technology. Here are ${brand} devices that support eSIM:`;
-
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="flex flex-col">
       {/* Hero Section (match landing hero vibe) */}
       <section
         className="relative overflow-hidden rounded-4xl px-6 py-14 md:px-12 md:py-20"
@@ -59,8 +48,83 @@ export function BrandDetailContent({
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl mt-12">
-        <BorderedContainer innerClassName="p-3 md:p-4">
+      <div className="container max-w-6xl mx-auto pb-12 flex flex-col gap-8">
+        <BrandSpecificContent
+          brandMeta={brandMeta}
+          devices={devices}
+          brand={brand}
+        />
+
+        {/* Quick Check Guide */}
+        <BorderedContainer>
+          <div>
+            <CardHeader>
+              <CardTitle>Cara Cek Manual</CardTitle>
+              <CardDescription>
+                Jika perangkat Anda tidak ada di daftar, cek secara manual
+                dengan langkah berikut:
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">iPhone</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Buka{" "}
+                    <strong>Pengaturan → Seluler → Tambah Paket Seluler</strong>
+                    . Jika opsi ini tersedia, iPhone Anda mendukung eSIM.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Android</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Buka{" "}
+                    <strong>
+                      Pengaturan → Jaringan & Internet → Kartu SIM → Tambah eSIM
+                    </strong>
+                    . Lokasi menu mungkin berbeda tergantung merek.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </div>
+        </BorderedContainer>
+      </div>
+    </div>
+  );
+}
+
+function BrandSpecificContent({
+  brandMeta,
+  devices,
+  brand,
+}: {
+  brandMeta?: BrandMeta;
+  devices: CompatibleDevice[];
+  brand: string;
+}) {
+  if (!brandMeta) return <></>;
+
+  const models = [...devices]
+    .filter((d) => d.is_compatible)
+    .map((d) => d.model)
+    .sort((a, b) => a.localeCompare(b));
+
+  const half = Math.ceil(models.length / 2);
+  const left = models.slice(0, half);
+  const right = models.slice(half);
+
+  const brandTitle = brandMeta.title;
+
+  const introText =
+    brandMeta.key === "Apple"
+      ? "Apple is one of the phone makers that tapped into the eSIM technology. Since 2018, all Apple phones have had eSIM capability. Here are Apple products that support eSIM:"
+      : `${brand} is one of the phone makers that supports eSIM technology. Here are ${brand} devices that support eSIM:`;
+
+  return (
+    <div className="flex flex-col gap-8" hidden={!brandMeta}>
+      <div className="mx-auto max-w-7xl mt-12">
+        <BorderedContainer>
           <div className="rounded-3xl border border-border bg-white p-6 md:p-10">
             <div className="flex items-center gap-4">
               <Button
@@ -79,7 +143,11 @@ export function BrandDetailContent({
 
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-semibold">
-                  <img src={brandMeta.icon} alt={`${brandMeta.title} logo`} className={brandMeta.className} />
+                  <img
+                    src={brandMeta.icon}
+                    alt={`${brandMeta.title} logo`}
+                    className={brandMeta.className}
+                  />
                 </div>
                 <h1 className="text-2xl font-medium md:text-3xl">
                   {brandTitle}

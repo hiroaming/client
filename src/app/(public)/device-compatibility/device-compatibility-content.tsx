@@ -1,48 +1,16 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { Search, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BorderedContainer } from "@/components/bordered-container";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { BrandMeta, getBrandMeta, toSlug } from "@/lib/device-compatibility";
-import { CTASection } from "@/components/landing/cta-section";
-import { FAQSection } from "@/components/landing/faq-section";
-import { PopularDestinations } from "@/components/store/popular-destinations";
-import type {
-  LocationWithPackageCount,
-  RegionWithPackageCount,
-} from "@/services/locations";
-
-// Local type definition for compatible devices (no database table exists)
-interface CompatibleDevice {
-  id: string;
-  brand: string;
-  model: string;
-  is_compatible: boolean;
-}
+import { BrandMeta, toSlug } from "@/lib/device-compatibility";
+import { DeviceSearchInput } from "@/components/device-compatibility/device-search-input";
 
 interface DeviceCompatibilityContentProps {
-  countries: LocationWithPackageCount[];
-  regions: RegionWithPackageCount[];
   brandMeta: BrandMeta[];
 }
 
 export function DeviceCompatibilityContent({
-  countries,
-  regions,
   brandMeta,
 }: DeviceCompatibilityContentProps) {
-  const [search, setSearch] = useState("");
-
   return (
     <div className="w-full flex-col">
       <div className="container mx-auto px-4 py-12">
@@ -76,20 +44,9 @@ export function DeviceCompatibilityContent({
             </h2>
           </div>
 
-          <div className="mx-auto mt-6 max-w-2xl">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search for your device (e.g., iPhone 17, Galaxy Z Flip5, Pixel 10...)"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-12 w-full rounded-full border-2 pl-12 pr-4"
-              />
-            </div>
-          </div>
+          <DeviceSearchInput />
 
-          <div className="mx-auto mt-10 max-w-4xl">
+          <div className="mx-auto mt-10 max-w-6xl">
             <BorderedContainer>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {brandMeta.map((meta) => {
@@ -123,48 +80,7 @@ export function DeviceCompatibilityContent({
             </BorderedContainer>
           </div>
         </section>
-
-        {/* Quick Check Guide */}
-        <Card className="mb-12 mx-auto max-w-3xl">
-          <CardHeader>
-            <CardTitle>Cara Cek Manual</CardTitle>
-            <CardDescription>
-              Jika perangkat Anda tidak ada di daftar, cek secara manual dengan
-              langkah berikut:
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">iPhone</h4>
-                <p className="text-sm text-muted-foreground">
-                  Buka{" "}
-                  <strong>Pengaturan → Seluler → Tambah Paket Seluler</strong>.
-                  Jika opsi ini tersedia, iPhone Anda mendukung eSIM.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Android</h4>
-                <p className="text-sm text-muted-foreground">
-                  Buka{" "}
-                  <strong>
-                    Pengaturan → Jaringan & Internet → Kartu SIM → Tambah eSIM
-                  </strong>
-                  . Lokasi menu mungkin berbeda tergantung merek.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Popular Destinations */}
-      <div className="flex flex-col mx-12">
-        <PopularDestinations countries={countries} regions={regions} />
-      </div>
-
-      <FAQSection />
-      <CTASection />
     </div>
   );
 }
