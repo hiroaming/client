@@ -1,48 +1,58 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Loader2, Wifi, Clock, ArrowRight, Check, AlertCircle } from "lucide-react"
-import { useAuth } from "@/providers/auth-provider"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import {
+  Loader2,
+  Wifi,
+  Clock,
+  ArrowRight,
+  Check,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "@/providers/auth-provider";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { formatDataSize } from "@/lib/utils"
-import { useCurrencyStore, formatPriceForCurrency } from "@/stores/currency-store"
-import { toast } from "sonner"
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { formatDataSize } from "@/lib/utils";
+import {
+  useCurrencyStore,
+  formatPriceForCurrency,
+} from "@/stores/currency-store";
+import { toast } from "sonner";
 
 interface TopupPackage {
-  id?: string
-  package_code: string
-  name: string
-  description: string | null
-  volume_gb: string | number | null
-  volume_bytes: number
-  duration: number
-  duration_unit: string
-  data_type?: number
-  speed: string | null
-  price_usd?: string | null
-  price_usd_cents: number
-  price_idr: number
-  image_url?: string | null
+  id?: string;
+  package_code: string;
+  name: string;
+  description: string | null;
+  volume_gb: string | number | null;
+  volume_bytes: number;
+  duration: number;
+  duration_unit: string;
+  data_type?: number;
+  speed: string | null;
+  price_usd?: string | null;
+  price_usd_cents: number;
+  price_idr: number;
+  image_url?: string | null;
 }
 
 interface TopupDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  profileId: string
-  profileIccid?: string | null
-  customerEmail: string
-  customerName?: string
-  userId?: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  profileId: string;
+  profileIccid?: string | null;
+  customerEmail: string;
+  customerName?: string;
+  userId?: string;
   // Guest-specific props
-  orderNumber?: string // Required for guest users
+  orderNumber?: string; // Required for guest users
 }
 
 export function TopupDialog({
@@ -55,37 +65,37 @@ export function TopupDialog({
   userId,
   orderNumber,
 }: TopupDialogProps) {
-  const { session } = useAuth()
-  const { currency } = useCurrencyStore()
-  const [packages, setPackages] = useState<TopupPackage[]>([])
-  const [loading, setLoading] = useState(false)
-  const [loadingCheckout, setLoadingCheckout] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null)
+  const { session } = useAuth();
+  const { currency } = useCurrencyStore();
+  const [packages, setPackages] = useState<TopupPackage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [profileInfo, setProfileInfo] = useState<{
-    current_data_used: number
-    current_data_total: number
-    current_usage_percentage: number
-    expires_at: string | null
-    topup_count: number
-    can_topup: boolean
-  } | null>(null)
+    current_data_used: number;
+    current_data_total: number;
+    current_usage_percentage: number;
+    expires_at: string | null;
+    topup_count: number;
+    can_topup: boolean;
+  } | null>(null);
 
   // Determine if this is a guest user (no session but has orderNumber)
-  const isGuest = !session && !!orderNumber
+  const isGuest = !session && !!orderNumber;
 
   useEffect(() => {
     if (open && profileId) {
-      fetchTopupPackages()
+      fetchTopupPackages();
     }
-  }, [open, profileId])
+  }, [open, profileId]);
 
   const fetchTopupPackages = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      let response: Response
-      let data: Record<string, unknown>
+      let response: Response;
+      let data: Record<string, unknown>;
 
       if (isGuest && orderNumber) {
         // Guest user: use guest endpoint with order_number + email verification
@@ -95,36 +105,43 @@ export function TopupDialog({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+              apikey:
+                process.env
+                  .NEXT_PUBLIC_SUPABASE_NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEYY ||
+                "",
             },
             body: JSON.stringify({
               order_number: orderNumber,
               email: customerEmail,
             }),
           }
-        )
+        );
 
-        data = await response.json()
+        data = await response.json();
 
         if (!data.success) {
-          throw new Error((data.error as string) || "Failed to fetch topup packages")
+          throw new Error(
+            (data.error as string) || "Failed to fetch topup packages"
+          );
         }
 
         // Transform guest response to match expected format
-        const guestPackages = ((data.packages as Array<{
-          package_code: string
-          name: string
-          description?: string
-          volume_gb: number
-          volume_bytes: number
-          duration: number
-          duration_unit: string
-          speed?: string
-          price: {
-            usd_cents: number
-            idr: number | null
-          }
-        }>) || []).map((pkg) => ({
+        const guestPackages = (
+          (data.packages as Array<{
+            package_code: string;
+            name: string;
+            description?: string;
+            volume_gb: number;
+            volume_bytes: number;
+            duration: number;
+            duration_unit: string;
+            speed?: string;
+            price: {
+              usd_cents: number;
+              idr: number | null;
+            };
+          }>) || []
+        ).map((pkg) => ({
           package_code: pkg.package_code,
           name: pkg.name,
           description: pkg.description || null,
@@ -135,17 +152,19 @@ export function TopupDialog({
           speed: pkg.speed || null,
           price_usd_cents: pkg.price.usd_cents,
           price_idr: pkg.price.idr || 0,
-        }))
+        }));
 
-        setPackages(guestPackages)
+        setPackages(guestPackages);
 
         // Set profile info from guest response
-        const esimData = data.esim as {
-          data_used_bytes?: number
-          data_total_bytes?: number
-          usage_percentage?: number
-          expires_at?: string
-        } | undefined
+        const esimData = data.esim as
+          | {
+              data_used_bytes?: number;
+              data_total_bytes?: number;
+              usage_percentage?: number;
+              expires_at?: string;
+            }
+          | undefined;
         if (esimData) {
           setProfileInfo({
             current_data_used: esimData.data_used_bytes || 0,
@@ -154,7 +173,7 @@ export function TopupDialog({
             expires_at: esimData.expires_at || null,
             topup_count: 0, // Guest endpoint doesn't return this
             can_topup: true,
-          })
+          });
         }
       } else {
         // Authenticated user: use authenticated endpoint
@@ -164,24 +183,29 @@ export function TopupDialog({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-              "Authorization": `Bearer ${session?.access_token || ""}`,
+              apikey:
+                process.env
+                  .NEXT_PUBLIC_SUPABASE_NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEYY ||
+                "",
+              Authorization: `Bearer ${session?.access_token || ""}`,
             },
             body: JSON.stringify({ esim_profile_id: profileId }),
           }
-        )
+        );
 
-        data = await response.json()
+        data = await response.json();
 
         if (!data.success) {
-          throw new Error((data.error as string) || "Failed to fetch topup packages")
+          throw new Error(
+            (data.error as string) || "Failed to fetch topup packages"
+          );
         }
 
         if (!data.can_topup) {
-          setError((data.reason as string) || "This eSIM cannot be topped up")
-          setPackages([])
+          setError((data.reason as string) || "This eSIM cannot be topped up");
+          setPackages([]);
         } else {
-          setPackages((data.packages as TopupPackage[]) || [])
+          setPackages((data.packages as TopupPackage[]) || []);
           setProfileInfo({
             current_data_used: data.current_data_used as number,
             current_data_total: data.current_data_total as number,
@@ -189,26 +213,26 @@ export function TopupDialog({
             expires_at: data.expires_at as string | null,
             topup_count: (data.topup_count as number) || 0,
             can_topup: data.can_topup as boolean,
-          })
+          });
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load packages")
+      setError(err instanceof Error ? err.message : "Failed to load packages");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleTopup = async () => {
     if (!selectedPackage) {
-      toast.error("Pilih paket top-up terlebih dahulu")
-      return
+      toast.error("Pilih paket top-up terlebih dahulu");
+      return;
     }
 
-    setLoadingCheckout(true)
+    setLoadingCheckout(true);
     try {
-      let response: Response
-      let data: Record<string, unknown>
+      let response: Response;
+      let data: Record<string, unknown>;
 
       if (isGuest && orderNumber) {
         // Guest user: use guest checkout endpoint
@@ -218,7 +242,10 @@ export function TopupDialog({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+              apikey:
+                process.env
+                  .NEXT_PUBLIC_SUPABASE_NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEYY ||
+                "",
             },
             body: JSON.stringify({
               order_number: orderNumber,
@@ -227,19 +254,21 @@ export function TopupDialog({
               success_url: window.location.href,
             }),
           }
-        )
+        );
 
-        data = await response.json()
+        data = await response.json();
 
         if (!data.success) {
-          throw new Error((data.error as string) || "Failed to create checkout")
+          throw new Error(
+            (data.error as string) || "Failed to create checkout"
+          );
         }
 
         // Redirect to Paddle checkout
         if (data.checkout_url) {
-          window.location.href = data.checkout_url as string
+          window.location.href = data.checkout_url as string;
         } else {
-          throw new Error("No checkout URL returned")
+          throw new Error("No checkout URL returned");
         }
       } else {
         // Authenticated user: use authenticated checkout endpoint
@@ -249,8 +278,11 @@ export function TopupDialog({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-              "Authorization": `Bearer ${session?.access_token || ""}`,
+              apikey:
+                process.env
+                  .NEXT_PUBLIC_SUPABASE_NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEYY ||
+                "",
+              Authorization: `Bearer ${session?.access_token || ""}`,
             },
             body: JSON.stringify({
               esim_profile_id: profileId,
@@ -260,28 +292,32 @@ export function TopupDialog({
               user_id: userId,
             }),
           }
-        )
+        );
 
-        data = await response.json()
+        data = await response.json();
 
         if (!data.success) {
-          throw new Error((data.error as string) || "Failed to create checkout")
+          throw new Error(
+            (data.error as string) || "Failed to create checkout"
+          );
         }
 
         // Redirect to Paddle checkout
         if (data.checkout_url) {
-          window.location.href = data.checkout_url as string
+          window.location.href = data.checkout_url as string;
         } else {
-          throw new Error("No checkout URL returned")
+          throw new Error("No checkout URL returned");
         }
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Gagal membuat checkout")
-      setLoadingCheckout(false)
+      toast.error(
+        err instanceof Error ? err.message : "Gagal membuat checkout"
+      );
+      setLoadingCheckout(false);
     }
-  }
+  };
 
-  const selectedPkg = packages.find((p) => p.package_code === selectedPackage)
+  const selectedPkg = packages.find((p) => p.package_code === selectedPackage);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -289,7 +325,9 @@ export function TopupDialog({
         <DialogHeader>
           <DialogTitle>Top Up eSIM</DialogTitle>
           <DialogDescription>
-            {profileIccid ? `ICCID: ${profileIccid}` : "Pilih paket untuk menambah kuota"}
+            {profileIccid
+              ? `ICCID: ${profileIccid}`
+              : "Pilih paket untuk menambah kuota"}
           </DialogDescription>
         </DialogHeader>
 
@@ -302,13 +340,22 @@ export function TopupDialog({
                 Sisa Kuota
               </span>
               <span className="font-medium">
-                {formatDataSize((profileInfo.current_data_total || 0) - (profileInfo.current_data_used || 0))} tersisa
+                {formatDataSize(
+                  (profileInfo.current_data_total || 0) -
+                    (profileInfo.current_data_used || 0)
+                )}{" "}
+                tersisa
               </span>
             </div>
             <div className="h-2 rounded-full bg-background overflow-hidden">
               <div
                 className="h-full bg-primary transition-all"
-                style={{ width: `${Math.min(profileInfo.current_usage_percentage || 0, 100)}%` }}
+                style={{
+                  width: `${Math.min(
+                    profileInfo.current_usage_percentage || 0,
+                    100
+                  )}%`,
+                }}
               />
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -316,7 +363,8 @@ export function TopupDialog({
               {profileInfo.expires_at && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  Berlaku hingga {new Date(profileInfo.expires_at).toLocaleDateString("id-ID")}
+                  Berlaku hingga{" "}
+                  {new Date(profileInfo.expires_at).toLocaleDateString("id-ID")}
                 </span>
               )}
             </div>
@@ -373,18 +421,29 @@ export function TopupDialog({
                         {pkg.volume_gb && (
                           <span className="flex items-center gap-1">
                             <Wifi className="h-3 w-3" />
-                            {typeof pkg.volume_gb === "number" ? pkg.volume_gb.toFixed(1) : pkg.volume_gb} GB
+                            {typeof pkg.volume_gb === "number"
+                              ? pkg.volume_gb.toFixed(1)
+                              : pkg.volume_gb}{" "}
+                            GB
                           </span>
                         )}
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {pkg.duration} {pkg.duration_unit === "days" || pkg.duration_unit === "DAY" ? "hari" : pkg.duration_unit}
+                          {pkg.duration}{" "}
+                          {pkg.duration_unit === "days" ||
+                          pkg.duration_unit === "DAY"
+                            ? "hari"
+                            : pkg.duration_unit}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-primary">
-                        {formatPriceForCurrency(pkg.price_usd_cents, pkg.price_idr, currency)}
+                        {formatPriceForCurrency(
+                          pkg.price_usd_cents,
+                          pkg.price_idr,
+                          currency
+                        )}
                       </p>
                     </div>
                   </div>
@@ -408,7 +467,11 @@ export function TopupDialog({
               <div className="flex justify-between items-center text-sm">
                 <span>Total Pembayaran:</span>
                 <span className="font-semibold text-lg">
-                  {formatPriceForCurrency(selectedPkg.price_usd_cents, selectedPkg.price_idr, currency)}
+                  {formatPriceForCurrency(
+                    selectedPkg.price_usd_cents,
+                    selectedPkg.price_idr,
+                    currency
+                  )}
                 </span>
               </div>
             )}
@@ -429,5 +492,5 @@ export function TopupDialog({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

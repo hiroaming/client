@@ -2,9 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-export function CTASection() {
+type CTASectionProps = {
+  className?: string;
+};
+export function CTASection({ className }: CTASectionProps) {
   return (
-    <section>
+    <section className={className}>
       <div className="w-full">
         {/* CTA banner */}
         <div className="relative overflow-hidden rounded-t-3xl bg-black text-white">
@@ -49,7 +52,7 @@ export function CTASection() {
               </div>
             </div>
 
-            <div className="relative hidden lg:block">
+            <div className="relative hidden lg:block pr-16">
               <div className="relative ml-auto h-[360px] w-[380px] scale-[2] translate-y-3/4">
                 <Image
                   src="/phone.png"

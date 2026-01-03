@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as AccordionPrimitive from "@radix-ui/react-accordion"
-import { ChevronDown } from "lucide-react"
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import { ChevronDown } from "lucide-react";
 
-import { BorderedContainer } from "@/components/bordered-container"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { BorderedContainer } from "@/components/bordered-container";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const faqs = [
   {
@@ -33,7 +33,12 @@ const faqs = [
     a: "If you run out of data, you can purchase a top-up from your account. The additional data is applied to your existing eSIM so you can stay connected without reinstalling.",
     value: "item-5",
   },
-]
+  {
+    q: "How are your network quality compared to other providers?",
+    a: "Our network is basically using same network as other providers, ESIM that you purchase will be using big providers in the respective coutnries e.g Docomo in Japan. You can see what providers you will be using in the ESIM detail page before your purchase.",
+    value: "item-7",
+  },
+];
 
 export function FAQSection() {
   return (
@@ -54,14 +59,17 @@ export function FAQSection() {
               Do you have other question?
             </p>
             <div className="mt-8">
-              <Button className="h-12 rounded-full px-10 bg-primary hover:bg-primary/90" asChild>
+              <Button
+                className="h-12 rounded-full px-10 bg-primary hover:bg-primary/90"
+                asChild
+              >
                 <a href="mailto:sales@hiroaming.com">Contact Sales</a>
               </Button>
             </div>
           </div>
 
           {/* Right */}
-          <BorderedContainer className="rounded-2xl" innerClassName="rounded-2xl p-3 sm:p-4 bg-gray-100">
+          <BorderedContainer>
             <div className="rounded-2xl bg-white p-2 sm:p-3">
               <AccordionPrimitive.Root
                 type="single"
@@ -78,20 +86,22 @@ export function FAQSection() {
                     <AccordionPrimitive.Header>
                       <AccordionPrimitive.Trigger
                         className={cn(
-                          "group flex w-full items-center justify-between gap-6 px-6 py-6 text-left",
+                          "group flex w-full items-center justify-between gap-6 px-6 py-6 text-left transition-all",
+                          "hover:bg-muted/50 rounded-2xl",
+                          "data-[state=open]:bg-muted/30",
                           "[&[data-state=open]_.faq-chevron]:rotate-180"
                         )}
                       >
-                        <span className="text-2xl font-semibold text-foreground">
+                        <span className="text-2xl font-semibold text-foreground transition-colors group-hover:text-primary">
                           {item.q}
                         </span>
-                        <span className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-white">
-                          <ChevronDown className="faq-chevron h-5 w-5 text-foreground transition-transform duration-200" />
+                        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border bg-white transition-all group-hover:border-primary group-hover:bg-primary/5">
+                          <ChevronDown className="faq-chevron h-5 w-5 text-foreground transition-transform duration-300 ease-in-out" />
                         </span>
                       </AccordionPrimitive.Trigger>
                     </AccordionPrimitive.Header>
 
-                    <AccordionPrimitive.Content className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                    <AccordionPrimitive.Content className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                       <div className="px-6 pb-6 pt-0 text-base leading-relaxed text-muted-foreground">
                         {item.a}
                       </div>
@@ -104,7 +114,5 @@ export function FAQSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }
-
-

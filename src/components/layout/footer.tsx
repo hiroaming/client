@@ -1,5 +1,5 @@
-import Link from "next/link"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const footerNavigation = {
   company: [
@@ -20,7 +20,7 @@ const footerNavigation = {
     { name: "Cookie Policy", href: "#" },
     { name: "Acceptable User", href: "#" },
   ],
-}
+};
 
 function Brand({ className }: { className?: string }) {
   return (
@@ -33,18 +33,18 @@ function Brand({ className }: { className?: string }) {
         <span className="text-primary">Roaming</span>
       </div>
     </div>
-  )
+  );
 }
 
 type Props = {
-  className?: string
-}
+  className?: string;
+};
 
 export function Footer({ className }: Props) {
   return (
     <footer className="bg-black">
       <div className={cn("px-2 py-4", className)}>
-        <div className="container mx-auto">
+        <div className="mx-2">
           {/* Footer card */}
           <div className="rounded-[32px] border border-border bg-white px-10 py-12 shadow-[0px_22px_60px_rgba(0,0,0,0.18)]">
             <div className="grid gap-10 lg:grid-cols-[1.35fr_1fr_1fr_1fr]">
@@ -54,14 +54,16 @@ export function Footer({ className }: Props) {
                   <Brand />
                 </Link>
                 <p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                  The smartest way to stay connected while traveling. Premium eSIM data plans in 200+
-                  destinations worldwide.
+                  The smartest way to stay connected while traveling. Premium
+                  eSIM data plans in 200+ destinations worldwide.
                 </p>
               </div>
 
               {/* Columns */}
               <div>
-                <div className="text-sm font-semibold text-foreground">Company</div>
+                <div className="text-sm font-semibold text-foreground">
+                  Company
+                </div>
                 <ul className="mt-6 space-y-4">
                   {footerNavigation.company.map((item) => (
                     <li key={item.name}>
@@ -77,7 +79,9 @@ export function Footer({ className }: Props) {
               </div>
 
               <div>
-                <div className="text-sm font-semibold text-foreground">Support</div>
+                <div className="text-sm font-semibold text-foreground">
+                  Support
+                </div>
                 <ul className="mt-6 space-y-4">
                   {footerNavigation.support.map((item) => (
                     <li key={item.name}>
@@ -93,7 +97,9 @@ export function Footer({ className }: Props) {
               </div>
 
               <div>
-                <div className="text-sm font-semibold text-foreground">Legal</div>
+                <div className="text-sm font-semibold text-foreground">
+                  Legal
+                </div>
                 <ul className="mt-6 space-y-4">
                   {footerNavigation.legal.map((item) => (
                     <li key={item.name}>
@@ -110,11 +116,12 @@ export function Footer({ className }: Props) {
             </div>
 
             <div className="mt-12 border-t border-border pt-10 text-center text-sm text-muted-foreground">
-              Copyright © {new Date().getFullYear()} HiRoaming. All Rights Reserved
+              Copyright © {new Date().getFullYear()} HiRoaming. All Rights
+              Reserved
             </div>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

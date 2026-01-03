@@ -1,45 +1,48 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react"
-import { useAuth } from "@/providers/auth-provider"
-import { useCartStore } from "@/stores/cart-store"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Menu, X, ShoppingCart, User, ChevronDown } from "lucide-react";
+import { useAuth } from "@/providers/auth-provider";
+import { useCartStore } from "@/stores/cart-store";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { CurrencySwitcher } from "@/components/currency-switcher"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { CurrencySwitcher } from "@/components/currency-switcher";
 
 const navigation = [
   { name: "Home", href: "/" },
   { name: "Store", href: "/store" },
   { name: "Compatibility", href: "/device-compatibility" },
   { name: "Track Order", href: "/check-order" },
-]
+];
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const { user, profile, signOut } = useAuth()
-  const itemCount = useCartStore((state) => state.getItemCount())
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { user, profile, signOut } = useAuth();
+  const itemCount = useCartStore((state) => state.getItemCount());
 
   // Wait for client-side hydration to prevent mismatch
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="container mx-auto px-4 pt-4">
-        <nav className="relative flex h-16 items-center rounded-full bg-background px-8 backdrop-blur supports-[backdrop-filter]:bg-background/60" style={{ boxShadow: '0px 14px 34px 0px #0000000D' }}>
+      <div className="w-[95%] lg:w-[60%] mx-auto px-4 pt-4">
+        <nav
+          className="relative flex h-16 items-center rounded-full bg-background px-8 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+          style={{ boxShadow: "0px 14px 34px 0px #0000000D" }}
+        >
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-primary">HIROAM</span>
@@ -84,11 +87,18 @@ export function Header() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={profile?.avatar_url || ""} alt={profile?.full_name || ""} />
+                      <AvatarImage
+                        src={profile?.avatar_url || ""}
+                        alt={profile?.full_name || ""}
+                      />
                       <AvatarFallback>
-                        {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                        {profile?.full_name?.charAt(0).toUpperCase() ||
+                          user.email?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -99,7 +109,9 @@ export function Header() {
                       {profile?.full_name && (
                         <p className="font-medium">{profile.full_name}</p>
                       )}
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
@@ -173,5 +185,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

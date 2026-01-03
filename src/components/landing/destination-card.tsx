@@ -1,34 +1,34 @@
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { CountryFlag } from "@/components/country-flag"
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { CountryFlag } from "@/components/country-flag";
+import { EsimBadge } from "@/components/ui/esim-badge";
 
 interface DestinationCardProps {
-  name: string
-  code: string
-  flag: string
-  price: number
-  href?: string
+  name: string;
+  code: string;
+  flag: string;
+  price: number;
+  href?: string;
 }
 
-export function DestinationCard({ name, code, flag, price, href }: DestinationCardProps) {
+export function DestinationCard({
+  name,
+  code,
+  flag,
+  price,
+  href,
+}: DestinationCardProps) {
   const cardContent = (
-    <Card className="relative rounded-3xl bg-white transition-all hover:shadow-md hover:border-primary/40">
+    <Card className="relative rounded-2xl bg-white transition-all hover:shadow-md hover:border-primary/40">
       <CardContent className="p-6">
         {/* ESIM Badge - Top Right */}
-        <div className="absolute top-6 right-6 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-          ESIM
-        </div>
+        <EsimBadge className="absolute top-6 right-6" />
 
         {/* Main Content */}
         <div className="pr-20">
           {/* Flag */}
-          <CountryFlag
-            code={code}
-            name={name}
-            emoji={flag}
-            size={56}
-          />
+          <CountryFlag code={code} name={name} size={56} />
 
           {/* Country */}
           <h3 className="mt-5 truncate text-2xl font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -55,16 +55,15 @@ export function DestinationCard({ name, code, flag, price, href }: DestinationCa
         </div>
       </CardContent>
     </Card>
-  )
+  );
 
   if (href) {
     return (
       <Link href={href} className="group">
         {cardContent}
       </Link>
-    )
+    );
   }
 
-  return cardContent
+  return cardContent;
 }
-

@@ -1,4 +1,4 @@
-import type { Location, Country, Region } from "@/types/location"
+import type { Location, Country, Region } from "@/types/location";
 
 // Popular countries for featured section
 export const POPULAR_COUNTRY_CODES = [
@@ -14,7 +14,7 @@ export const POPULAR_COUNTRY_CODES = [
   "FR", // France
   "DE", // Germany
   "IT", // Italy
-]
+];
 
 // Region definitions with their identifiers
 export const REGIONS: Region[] = [
@@ -91,29 +91,36 @@ export const REGIONS: Region[] = [
     countryCount: 6,
     iconUrl: "/img/regions/gcc.svg",
   },
-]
+];
 
 // Map region slug patterns to region codes
 export function getRegionCodeFromSlug(slug: string): string | null {
-  const lowerSlug = slug.toLowerCase()
+  const lowerSlug = slug.toLowerCase();
 
-  if (lowerSlug.includes("global")) return "global"
-  if (lowerSlug.startsWith("eu-") || lowerSlug.includes("europe")) return "europe"
-  if (lowerSlug.startsWith("as-") || lowerSlug.includes("asia")) return "asia"
-  if (lowerSlug.includes("north") && lowerSlug.includes("america")) return "north-america"
-  if (lowerSlug.includes("south") && lowerSlug.includes("america")) return "south-america"
-  if (lowerSlug.startsWith("af-") || lowerSlug.includes("africa")) return "africa"
-  if (lowerSlug.includes("middle") || lowerSlug.includes("mena")) return "middle-east"
-  if (lowerSlug.includes("aunz") || lowerSlug.includes("oceania")) return "oceania"
-  if (lowerSlug.includes("caribbean") || lowerSlug.includes("carib")) return "caribbean"
-  if (lowerSlug.includes("gcc") || lowerSlug.includes("gulf")) return "gcc"
+  if (lowerSlug.includes("global")) return "global";
+  if (lowerSlug.startsWith("eu-") || lowerSlug.includes("europe"))
+    return "europe";
+  if (lowerSlug.startsWith("as-") || lowerSlug.includes("asia")) return "asia";
+  if (lowerSlug.includes("north") && lowerSlug.includes("america"))
+    return "north-america";
+  if (lowerSlug.includes("south") && lowerSlug.includes("america"))
+    return "south-america";
+  if (lowerSlug.startsWith("af-") || lowerSlug.includes("africa"))
+    return "africa";
+  if (lowerSlug.includes("middle") || lowerSlug.includes("mena"))
+    return "middle-east";
+  if (lowerSlug.includes("aunz") || lowerSlug.includes("oceania"))
+    return "oceania";
+  if (lowerSlug.includes("caribbean") || lowerSlug.includes("carib"))
+    return "caribbean";
+  if (lowerSlug.includes("gcc") || lowerSlug.includes("gulf")) return "gcc";
 
-  return null
+  return null;
 }
 
 // Get flag URL for a country code (fallback to local flags)
 export function getFlagUrl(countryCode: string): string {
-  return `/img/flags/${countryCode.toLowerCase()}.png`
+  return `/img/flags/${countryCode.toLowerCase()}.png`;
 }
 
 // Get image URL with proper handling for API URLs
@@ -126,54 +133,56 @@ export function getLocationImageUrl(
   if (logoUrl) {
     // Already an absolute URL (from API)
     if (logoUrl.startsWith("http")) {
-      return logoUrl
+      return logoUrl;
     }
     // Relative URL from static.redteago.com
     if (logoUrl.startsWith("/img/")) {
-      return `https://static.redteago.com${logoUrl}`
+      return `https://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`;
     }
     // Any other relative path
-    return logoUrl
+    return logoUrl;
   }
   // Fallback to local flag
-  return getFlagUrl(countryCode)
+  return getFlagUrl(countryCode);
 }
 
 // Extract country name from package name
 export function extractCountryName(packageName: string): string {
   // Remove data spec from end (e.g., "Japan 1GB 7Days" -> "Japan")
-  return packageName.replace(/\s+\d+(\.\d+)?(GB|MB).*$/i, "").trim()
+  return packageName.replace(/\s+\d+(\.\d+)?(GB|MB).*$/i, "").trim();
 }
 
 // Sort locations alphabetically with popular first
 export function sortLocations<T extends Location>(locations: T[]): T[] {
   return [...locations].sort((a, b) => {
     // Popular items first
-    if (a.popular && !b.popular) return -1
-    if (!a.popular && b.popular) return 1
+    if (a.popular && !b.popular) return -1;
+    if (!a.popular && b.popular) return 1;
     // Then alphabetically
-    return a.name.localeCompare(b.name)
-  })
+    return a.name.localeCompare(b.name);
+  });
 }
 
 // Group countries by first letter for alphabet navigation
-export function groupCountriesByLetter(countries: Country[]): Record<string, Country[]> {
-  const grouped: Record<string, Country[]> = {}
+export function groupCountriesByLetter(
+  countries: Country[]
+): Record<string, Country[]> {
+  const grouped: Record<string, Country[]> = {};
 
   countries.forEach((country) => {
-    const firstLetter = country.name.charAt(0).toUpperCase()
+    const firstLetter = country.name.charAt(0).toUpperCase();
     if (!grouped[firstLetter]) {
-      grouped[firstLetter] = []
+      grouped[firstLetter] = [];
     }
-    grouped[firstLetter].push(country)
-  })
+    grouped[firstLetter].push(country);
+  });
 
   // Sort countries within each group
   Object.keys(grouped).forEach((letter) => {
-    grouped[letter].sort((a, b) => a.name.localeCompare(b.name))
-  })
+    grouped[letter].sort((a, b) => a.name.localeCompare(b.name));
+  });
 
-  return grouped
+  return grouped;
 }
 
 // Filter locations by search query
@@ -181,12 +190,12 @@ export function filterLocations<T extends Location>(
   locations: T[],
   query: string
 ): T[] {
-  if (!query.trim()) return locations
+  if (!query.trim()) return locations;
 
-  const lowerQuery = query.toLowerCase().trim()
+  const lowerQuery = query.toLowerCase().trim();
   return locations.filter(
     (location) =>
       location.name.toLowerCase().includes(lowerQuery) ||
       location.code.toLowerCase().includes(lowerQuery)
-  )
+  );
 }
