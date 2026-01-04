@@ -66,7 +66,7 @@ export default function LandingPage() {
       <Header />
       <HeroSection />
       <PaymentProcessorSection />
-      <main className="flex-1 max-w-6xl mx-auto flex flex-col gap-24 pb-24">
+      <main className="flex-1 max-w-screen 6xl:max-w-6xl flex flex-col gap-24 pb-24">
         {/* Popular Destinations */}
         <section className="pt-10 bg-background">
           <div className="container mx-auto px-4 max-w-7xl">
@@ -143,7 +143,7 @@ function HeroSection() {
 
           {/* Headline */}
           <div className="text-center mb-8">
-            <h1 className="mb-4 text-7xl font-normal tracking-normal leading-[1.125]">
+            <h1 className="mb-4 text-4xl md:text-5xl lg:text-7xl font-normal tracking-normal leading-[1.125]">
               Roam <span className="text-primary">Freely</span>,<br />
               Stay Connected
             </h1>
@@ -154,7 +154,7 @@ function HeroSection() {
           </div>
 
           {/* Search Bar */}
-          <div className="mb-6 max-w-2xl mx-auto">
+          <div className="mb-6 max-w-md lg:max-w-2xl mx-auto">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input

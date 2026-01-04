@@ -3,13 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CountryFlag } from "@/components/country-flag";
 import { EsimBadge } from "@/components/ui/esim-badge";
-
+import { cn } from "@/lib/utils";
 interface DestinationCardProps {
   name: string;
   code: string;
   flag: string;
   price: number;
   href?: string;
+  className?: string;
 }
 
 export function DestinationCard({
@@ -18,9 +19,15 @@ export function DestinationCard({
   flag,
   price,
   href,
+  className,
 }: DestinationCardProps) {
   const cardContent = (
-    <Card className="relative rounded-2xl bg-white transition-all hover:shadow-md hover:border-primary/40">
+    <Card
+      className={cn(
+        "relative rounded-2xl bg-white transition-all hover:shadow-md hover:border-primary/40",
+        className
+      )}
+    >
       <CardContent className="p-6">
         {/* ESIM Badge - Top Right */}
         <EsimBadge className="absolute top-6 right-6" />

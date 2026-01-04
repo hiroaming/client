@@ -24,7 +24,7 @@ export function StoreContent() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-12 container max-w-6xl mx-auto">
+      <div className="flex flex-col gap-12 container max-w-6xl mx-auto px-4">
         <PopularDestinationsSection
           innerClassName="bg-primary"
           borderClassName="border-primary bg-primary"

@@ -7,6 +7,7 @@ import {
   ChevronRight,
   CirclePoundSterling,
 } from "lucide-react";
+import { EsimBadge } from "../ui/esim-badge";
 
 export function WhyChooseHiRoamingSection() {
   return (
@@ -77,11 +78,9 @@ export function WhyChooseHiRoamingSection() {
 
               {/* Right product card */}
               <div className="relative w-full rounded-3xl bg-white p-6 text-foreground shadow-lg">
-                <div className="absolute right-6 top-6 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                  ESIM
-                </div>
+                <EsimBadge className="hidden right-6 top-6 sm:block absolute" />
 
-                <div className="grid gap-6 lg:grid-cols-[1fr_220px] lg:items-stretch">
+                <div className="grid gap-6 lg:grid-cols-[1fr_220px] lg:items-stretch overflow-hidden">
                   {/* Plan info */}
                   <div className="pr-0 lg:pr-2">
                     <div className="flex items-center gap-4">
@@ -100,13 +99,13 @@ export function WhyChooseHiRoamingSection() {
                       </span>
                     </div>
 
-                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <div className="mt-6 flex flex-row items-center gap-3 overflow-hidden">
                       {["3 Days", "7 Days", "14 Days", "30 Days"].map(
                         (label) => (
                           <div
                             key={label}
                             className={cn(
-                              "rounded-full border px-4 py-2 text-sm",
+                              "rounded-full border px-4 py-2 sm:text-sm text-xs whitespace-nowrap",
                               label === "7 Days"
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-border bg-white text-muted-foreground"

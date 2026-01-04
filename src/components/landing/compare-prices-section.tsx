@@ -88,7 +88,7 @@ function BestBadge() {
 export function ComparePricesSection() {
   return (
     <section id="compare-prices" className="container mx-auto">
-      <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between mx-4">
         <div>
           <h2 className="mb-2 text-5xl font-normal leading-none tracking-normal">
             <span className="text-primary">Compare</span>{" "}
@@ -111,57 +111,57 @@ export function ComparePricesSection() {
         className="rounded-2xl"
         innerClassName="rounded-2xl bg-gray-100"
       >
-        <div className="rounded-2xl bg-white p-2 sm:p-4">
+        <div className="rounded-2xl bg-white p-2 sm:p-4 overflow-hidden">
           <div className="overflow-x-auto">
-            <div className="min-w-[980px] rounded-2xl overflow-hidden">
-              {/* Table wrapper with relative positioning */}
-              <div className="relative">
-                {/* Seamless background for HiRoaming column - spans full height */}
-                <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
-                  <div className="grid grid-cols-[260px_repeat(4,1fr)] h-full">
-                    <div className="col-start-5 col-end-6 bg-muted/40" />
-                  </div>
-                </div>
-
-                {/* Header Row */}
-                <div className="grid grid-cols-[260px_repeat(4,1fr)] items-center border-b border-border relative z-10">
-                  <div className="py-10" />
+            <table className="min-w-[980px] border-collapse">
+              <colgroup>
+                <col className="w-[260px]" />
+                <col />
+                <col />
+                <col />
+                <col />
+              </colgroup>
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="py-10" />
                   {providers.map((p) => (
-                    <div
+                    <th
                       key={p.key}
                       className={cn(
-                        "flex items-center justify-center py-10 relative z-10",
+                        "py-10 text-center",
+                        p.key === "hiroaming" && "bg-muted/40",
                         p.className
                       )}
                     >
                       {p.logo ? (
-                        <Image
-                          src={p.logo}
-                          alt={p.name}
-                          width={200}
-                          height={40}
-                          className="object-contain h-24 translate-x-10"
-                        />
+                        <div className="flex items-center justify-center">
+                          <Image
+                            src={p.logo}
+                            alt={p.name}
+                            width={200}
+                            height={40}
+                            className="object-contain h-24 translate-x-10"
+                          />
+                        </div>
                       ) : (
                         <span className="text-2xl font-semibold text-foreground/80">
                           {p.name}
                         </span>
                       )}
-                    </div>
+                    </th>
                   ))}
-                </div>
-
-                {/* Body Rows */}
+                </tr>
+              </thead>
+              <tbody>
                 {rows.map((row, rowIdx) => (
-                  <div
+                  <tr
                     key={row.label}
                     className={cn(
-                      "grid grid-cols-[260px_repeat(4,1fr)] items-center border-b border-border relative z-10",
+                      "border-b border-border",
                       rowIdx === rows.length - 1 && "border-b-0"
                     )}
                   >
-                    {/* Plan cell */}
-                    <div className="px-6 py-10 relative z-10">
+                    <td className="px-6 py-10">
                       <div className="text-base font-medium text-foreground">
                         {row.label}
                       </div>
@@ -173,18 +173,16 @@ export function ComparePricesSection() {
                           {row.duration}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Provider cells */}
+                    </td>
                     {providers.map((p) => {
                       const isHi = p.key === "hiroaming";
                       const isBest = row.best === p.key;
                       return (
-                        <div
+                        <td
                           key={`${row.label}-${p.key}`}
                           className={cn(
-                            "px-6 py-10 text-center relative z-10",
-                            isHi && "text-foreground"
+                            "px-6 py-10 text-center",
+                            isHi && "bg-muted/40 text-foreground"
                           )}
                         >
                           {isHi ? (
@@ -199,13 +197,13 @@ export function ComparePricesSection() {
                               {row.prices[p.key]}
                             </span>
                           )}
-                        </div>
+                        </td>
                       );
                     })}
-                  </div>
+                  </tr>
                 ))}
-              </div>
-            </div>
+              </tbody>
+            </table>
           </div>
         </div>
       </BorderedContainer>

@@ -105,8 +105,8 @@ export function PopularDestinations({
       .length === 1;
 
   return (
-    <section id="destinations container mx-auto">
-      {PopularDestinationHeader()}
+    <section>
+      <PopularDestinationHeader />
 
       <Tabs defaultValue="countries">
         <TabsList
@@ -138,10 +138,10 @@ export function PopularDestinations({
 
         <TabsContent value="countries" className="mt-6">
           <BorderedContainer
-            className={cn("hidden md:block", borderClassName)}
+            className={borderClassName}
             innerClassName={innerClassName}
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="gap-4 grid-cols-3 lg:grid hidden">
               {popularCountries.map((country) => (
                 <DestinationCard
                   key={country.code}
@@ -153,12 +153,19 @@ export function PopularDestinations({
                 />
               ))}
             </div>
-          </BorderedContainer>
-          <BorderedContainer
-            className={cn("block md:hidden", borderClassName)}
-            innerClassName={innerClassName}
-          >
-            <div className="grid gap-4 grid-cols-1">
+            <div className="gap-4 grid-cols-2 sm:grid hidden lg:hidden">
+              {popularCountries.slice(3).map((country) => (
+                <DestinationCard
+                  key={country.code}
+                  name={country.name}
+                  code={country.code.toLowerCase()}
+                  flag=""
+                  price={country.minPriceUsdCents / 10000}
+                  href={`/store/${country.code.toLowerCase()}`}
+                />
+              ))}
+            </div>
+            <div className="grid gap-4 grid-cols-1 sm:hidden">
               {popularCountries.slice(0, 3).map((country) => (
                 <DestinationCard
                   key={country.code}
