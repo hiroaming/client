@@ -113,7 +113,7 @@ export function ComparePricesSection() {
       >
         <div className="rounded-2xl bg-white p-2 sm:p-4 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-[980px] border-collapse">
+            <table className="min-w-[980px] border-collapse w-full">
               <colgroup>
                 <col className="w-[260px]" />
                 <col />
@@ -130,7 +130,7 @@ export function ComparePricesSection() {
                       className={cn(
                         "py-10 text-center",
                         p.key === "hiroaming" && "bg-muted/40",
-                        p.className
+                        p.className,
                       )}
                     >
                       {p.logo ? (
@@ -158,7 +158,7 @@ export function ComparePricesSection() {
                     key={row.label}
                     className={cn(
                       "border-b border-border",
-                      rowIdx === rows.length - 1 && "border-b-0"
+                      rowIdx === rows.length - 1 && "border-b-0",
                     )}
                   >
                     <td className="px-6 py-10">
@@ -182,7 +182,7 @@ export function ComparePricesSection() {
                           key={`${row.label}-${p.key}`}
                           className={cn(
                             "px-6 py-10 text-center",
-                            isHi && "bg-muted/40 text-foreground"
+                            isHi && "bg-muted/40 text-foreground",
                           )}
                         >
                           {isHi ? (

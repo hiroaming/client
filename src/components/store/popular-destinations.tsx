@@ -11,7 +11,6 @@ import type {
   LocationWithPackageCount,
   RegionWithPackageCount,
 } from "@/services/locations";
-import { cn } from "@/lib/utils";
 
 interface PopularDestinationsProps {
   countries: LocationWithPackageCount[];
