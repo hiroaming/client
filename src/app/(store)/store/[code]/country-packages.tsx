@@ -1,87 +1,134 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Wifi, Clock, ShoppingCart, Minus, Plus, Zap, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useMemo } from "react";
+import {
+  Wifi,
+  Clock,
+  ShoppingCart,
+  Minus,
+  Plus,
+  Zap,
+  Info,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { useCartStore } from "@/stores/cart-store"
-import { useCurrencyStore } from "@/stores/currency-store"
-import { formatDataSize } from "@/lib/utils"
-import { isUnlimitedPackage, getDataTypeLabel } from "@/types/location"
-import type { EsimPackage } from "@/types/database"
+} from "@/components/ui/tooltip";
+import { useCartStore } from "@/stores/cart-store";
+import { useCurrencyStore } from "@/stores/currency-store";
+import { formatDataSize } from "@/lib/utils";
+import { isUnlimitedPackage, getDataTypeLabel } from "@/types/location";
+import type { EsimPackage } from "@/types/database";
 import {
   calculateEffectivePrice,
   formatPriceWithDiscount,
   type PriceSchedule,
-} from "@/lib/price-utils"
-import { toast } from "sonner"
+} from "@/lib/price-utils";
+import { toast } from "sonner";
 
 interface CountryPackagesProps {
-  packages: EsimPackage[]
-  countryName: string
-  priceSchedules: PriceSchedule[]
+  packages: EsimPackage[];
+  countryName: string;
+  priceSchedules: PriceSchedule[];
+  hideTabs?: boolean;
 }
 
 export function CountryPackages({
   packages,
   countryName,
   priceSchedules,
+  hideTabs = false,
 }: CountryPackagesProps) {
-  const currency = useCurrencyStore((state) => state.currency)
-  const addItem = useCartStore((state) => state.addItem)
+  const currency = useCurrencyStore((state) => state.currency);
+  const addItem = useCartStore((state) => state.addItem);
 
   // Separate packages into fixed and unlimited
   const { fixedPackages, unlimitedPackages } = useMemo(() => {
-    const fixed: EsimPackage[] = []
-    const unlimited: EsimPackage[] = []
+    const fixed: EsimPackage[] = [];
+    const unlimited: EsimPackage[] = [];
 
     packages.forEach((pkg) => {
       if (isUnlimitedPackage(pkg.data_type)) {
-        unlimited.push(pkg)
+        unlimited.push(pkg);
       } else {
-        fixed.push(pkg)
+        fixed.push(pkg);
       }
-    })
+    });
 
-    return { fixedPackages: fixed, unlimitedPackages: unlimited }
-  }, [packages])
+    return { fixedPackages: fixed, unlimitedPackages: unlimited };
+  }, [packages]);
 
   // Calculate effective prices
   const packagePrices = useMemo(() => {
-    const priceMap = new Map<string, ReturnType<typeof calculateEffectivePrice>>()
+    const priceMap = new Map<
+      string,
+      ReturnType<typeof calculateEffectivePrice>
+    >();
     packages.forEach((pkg) => {
       priceMap.set(
         pkg.id,
-        calculateEffectivePrice(pkg.id, pkg.price_usd_cents, pkg.price_idr, priceSchedules)
-      )
-    })
-    return priceMap
-  }, [packages, priceSchedules])
+        calculateEffectivePrice(
+          pkg.id,
+          pkg.price_usd_cents,
+          pkg.price_idr,
+          priceSchedules,
+        ),
+      );
+    });
+    return priceMap;
+  }, [packages, priceSchedules]);
 
   const handleAddToCart = (pkg: EsimPackage) => {
-    addItem(pkg)
-    toast.success(`${pkg.display_name || pkg.name} ditambahkan ke keranjang`)
-  }
+    addItem(pkg);
+    toast.success(`${pkg.display_name || pkg.name} ditambahkan ke keranjang`);
+  };
 
-  const hasUnlimited = unlimitedPackages.length > 0
-  const hasFixed = fixedPackages.length > 0
+  const hasUnlimited = unlimitedPackages.length > 0;
+  const hasFixed = fixedPackages.length > 0;
 
   // Default tab
-  const defaultTab = hasFixed ? "fixed" : "unlimited"
+  const defaultTab = hasFixed ? "fixed" : "unlimited";
 
   return (
     <div>
-      {hasFixed && hasUnlimited ? (
+      {hideTabs ? (
+        // Render without tabs when hideTabs is true
+        hasFixed ? (
+          <FixedPackagesGrid
+            packages={fixedPackages}
+            packagePrices={packagePrices}
+            currency={currency}
+            onAddToCart={handleAddToCart}
+          />
+        ) : hasUnlimited ? (
+          <UnlimitedPackagesSection
+            packages={unlimitedPackages}
+            packagePrices={packagePrices}
+            currency={currency}
+            countryName={countryName}
+          />
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground">
+              Tidak ada paket tersedia untuk negara ini.
+            </p>
+          </div>
+        )
+      ) : hasFixed && hasUnlimited ? (
         <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="fixed" className="gap-2">
@@ -134,7 +181,7 @@ export function CountryPackages({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Fixed Packages Grid Component
@@ -144,18 +191,18 @@ function FixedPackagesGrid({
   currency,
   onAddToCart,
 }: {
-  packages: EsimPackage[]
-  packagePrices: Map<string, ReturnType<typeof calculateEffectivePrice>>
-  currency: "USD" | "IDR"
-  onAddToCart: (pkg: EsimPackage) => void
+  packages: EsimPackage[];
+  packagePrices: Map<string, ReturnType<typeof calculateEffectivePrice>>;
+  currency: "USD" | "IDR";
+  onAddToCart: (pkg: EsimPackage) => void;
 }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {packages.map((pkg) => {
-        const effectivePrice = packagePrices.get(pkg.id)
+        const effectivePrice = packagePrices.get(pkg.id);
         const formatted = effectivePrice
           ? formatPriceWithDiscount(effectivePrice, currency)
-          : null
+          : null;
 
         return (
           <Card key={pkg.id} className="flex flex-col">
@@ -175,12 +222,15 @@ function FixedPackagesGrid({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Wifi className="h-4 w-4 text-primary" />
-                  <span className="font-medium">{formatDataSize(pkg.volume_bytes)}</span>
+                  <span className="font-medium">
+                    {formatDataSize(pkg.volume_bytes)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-primary" />
                   <span>
-                    {pkg.duration} {pkg.duration_unit === "day" ? "Hari" : pkg.duration_unit}
+                    {pkg.duration}{" "}
+                    {pkg.duration_unit === "day" ? "Hari" : pkg.duration_unit}
                   </span>
                 </div>
               </div>
@@ -192,7 +242,9 @@ function FixedPackagesGrid({
                       {formatted.original}
                     </p>
                   )}
-                  <p className="text-xl font-bold text-primary">{formatted.final}</p>
+                  <p className="text-xl font-bold text-primary">
+                    {formatted.final}
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -203,10 +255,10 @@ function FixedPackagesGrid({
               </Button>
             </CardFooter>
           </Card>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 // Unlimited Packages Section with Day Selector
@@ -216,31 +268,33 @@ function UnlimitedPackagesSection({
   currency,
   countryName,
 }: {
-  packages: EsimPackage[]
-  packagePrices: Map<string, ReturnType<typeof calculateEffectivePrice>>
-  currency: "USD" | "IDR"
-  countryName: string
+  packages: EsimPackage[];
+  packagePrices: Map<string, ReturnType<typeof calculateEffectivePrice>>;
+  currency: "USD" | "IDR";
+  countryName: string;
 }) {
   // Group unlimited packages by data limit (e.g., 500MB/day, 1GB/day, 2GB/day, Unlimited)
   const groupedPackages = useMemo(() => {
-    const groups = new Map<string, EsimPackage>()
+    const groups = new Map<string, EsimPackage>();
 
     packages.forEach((pkg) => {
       // Extract the daily data limit from the name
-      const dailyMatch = pkg.name.match(/(\d+(\.\d+)?)(GB|MB)\/Day/i)
-      const key = dailyMatch ? `${dailyMatch[1]}${dailyMatch[3]}/Day` : "Unlimited"
+      const dailyMatch = pkg.name.match(/(\d+(\.\d+)?)(GB|MB)\/Day/i);
+      const key = dailyMatch
+        ? `${dailyMatch[1]}${dailyMatch[3]}/Day`
+        : "Unlimited";
 
       // Only keep one package per group (they should have same base price)
       if (!groups.has(key)) {
-        groups.set(key, pkg)
+        groups.set(key, pkg);
       }
-    })
+    });
 
     return Array.from(groups.entries()).map(([label, pkg]) => ({
       label,
       package: pkg,
-    }))
-  }, [packages])
+    }));
+  }, [packages]);
 
   return (
     <div className="space-y-6">
@@ -272,7 +326,7 @@ function UnlimitedPackagesSection({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // Individual Unlimited Package Card with Day Selector
@@ -283,59 +337,62 @@ function UnlimitedPackageCard({
   currency,
   countryName,
 }: {
-  pkg: EsimPackage
-  label: string
-  packagePrices: Map<string, ReturnType<typeof calculateEffectivePrice>>
-  currency: "USD" | "IDR"
-  countryName: string
+  pkg: EsimPackage;
+  label: string;
+  packagePrices: Map<string, ReturnType<typeof calculateEffectivePrice>>;
+  currency: "USD" | "IDR";
+  countryName: string;
 }) {
-  const [days, setDays] = useState(7)
-  const addItemWithPeriod = useCartStore((state) => state.addItemWithPeriod)
+  const [days, setDays] = useState(7);
+  const addItemWithPeriod = useCartStore((state) => state.addItemWithPeriod);
 
   // Calculate price based on days
   const pricePerDay = useMemo(() => {
-    const effectivePrice = packagePrices.get(pkg.id)
+    const effectivePrice = packagePrices.get(pkg.id);
     if (!effectivePrice) {
-      return { usd: pkg.price_usd_cents, idr: pkg.price_idr }
+      return { usd: pkg.price_usd_cents, idr: pkg.price_idr };
     }
     return {
       usd: effectivePrice.finalUsdCents,
       idr: effectivePrice.finalIdr,
-    }
-  }, [pkg, packagePrices])
+    };
+  }, [pkg, packagePrices]);
 
   const totalPrice = useMemo(() => {
-    const total = currency === "USD"
-      ? (pricePerDay.usd * days) / 10000
-      : pricePerDay.idr * days
+    const total =
+      currency === "USD"
+        ? (pricePerDay.usd * days) / 10000
+        : pricePerDay.idr * days;
 
     return currency === "USD"
       ? `$${total.toFixed(2)}`
-      : `Rp ${total.toLocaleString("id-ID")}`
-  }, [pricePerDay, days, currency])
+      : `Rp ${total.toLocaleString("id-ID")}`;
+  }, [pricePerDay, days, currency]);
 
   const pricePerDayFormatted = useMemo(() => {
     return currency === "USD"
       ? `$${(pricePerDay.usd / 10000).toFixed(2)}`
-      : `Rp ${pricePerDay.idr.toLocaleString("id-ID")}`
-  }, [pricePerDay, currency])
+      : `Rp ${pricePerDay.idr.toLocaleString("id-ID")}`;
+  }, [pricePerDay, currency]);
 
   const handleDaysChange = (value: number[]) => {
-    setDays(value[0])
-  }
+    setDays(value[0]);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value)
+    const value = parseInt(e.target.value);
     if (!isNaN(value) && value >= 1 && value <= 365) {
-      setDays(value)
+      setDays(value);
     }
-  }
+  };
 
   const handleAddToCart = () => {
     // Use the new addItemWithPeriod function
-    addItemWithPeriod(pkg, days)
-    toast.success(`${label} ${countryName} (${days} hari) ditambahkan ke keranjang`)
-  }
+    addItemWithPeriod(pkg, days);
+    toast.success(
+      `${label} ${countryName} (${days} hari) ditambahkan ke keranjang`,
+    );
+  };
 
   return (
     <Card className="flex flex-col">
@@ -354,8 +411,10 @@ function UnlimitedPackageCard({
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <p>
-                  {pkg.data_type === 2 && "Kecepatan berkurang setelah batas harian tercapai"}
-                  {pkg.data_type === 3 && "Layanan berhenti setelah batas harian tercapai"}
+                  {pkg.data_type === 2 &&
+                    "Kecepatan berkurang setelah batas harian tercapai"}
+                  {pkg.data_type === 3 &&
+                    "Layanan berhenti setelah batas harian tercapai"}
                   {pkg.data_type === 4 && "Data unlimited tanpa batasan harian"}
                 </p>
               </TooltipContent>
@@ -431,8 +490,12 @@ function UnlimitedPackageCard({
         {/* Total Price */}
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-baseline justify-between">
-            <span className="text-sm text-muted-foreground">Total ({days} hari)</span>
-            <span className="text-2xl font-bold text-primary">{totalPrice}</span>
+            <span className="text-sm text-muted-foreground">
+              Total ({days} hari)
+            </span>
+            <span className="text-2xl font-bold text-primary">
+              {totalPrice}
+            </span>
           </div>
         </div>
       </CardContent>
@@ -444,5 +507,5 @@ function UnlimitedPackageCard({
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

@@ -9,11 +9,11 @@ import {
   PopularDestinations,
 } from "./popular-destinations";
 
-function PopularDestinationsSkeleton() {
+function PopularDestinationsSkeleton({ centerHeader }: Props) {
   return (
     <section className="mb-12">
       <div className="mb-6">
-        <PopularDestinationHeader />
+        <PopularDestinationHeader centered={centerHeader} />
       </div>
       <div className="flex gap-3 mb-6">
         <Skeleton className="h-10 w-24 rounded-full" />
@@ -40,7 +40,7 @@ type Props = {
 
 export function PopularDestinationsSection(props: Props) {
   return (
-    <Suspense fallback={<PopularDestinationsSkeleton />}>
+    <Suspense fallback={<PopularDestinationsSkeleton {...props} />}>
       <PopularDestinationsSectionAsync {...props} />
     </Suspense>
   );

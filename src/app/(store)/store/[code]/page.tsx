@@ -1,15 +1,10 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCountryByCode, getPackagesForCountry } from "@/services/locations";
-import { CountryPackages } from "./country-packages";
-import type { EsimPackage } from "@/types/database";
+import { CountryDetailContent } from "./country-detail-content";
 import type { PriceSchedule } from "@/lib/price-utils";
 
 interface PageProps {
@@ -90,44 +85,11 @@ export default async function CountryDetailPage({ params }: PageProps) {
 
   return (
     <Suspense fallback={<CountrySkeleton />}>
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Link */}
-        <Link href="/store">
-          <Button variant="ghost" size="sm" className="mb-6 -ml-2">
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Kembali ke Daftar Negara
-          </Button>
-        </Link>
-
-        {/* Country Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="relative w-16 h-12 rounded-lg overflow-hidden bg-muted shadow-sm">
-            <Image
-              src={
-                country.flagUrl ||
-                `/img/flags/${country.code.toLowerCase()}.png`
-              }
-              alt={country.name}
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold md:text-3xl">{country.name}</h1>
-            <p className="text-muted-foreground">
-              {country.packageCount} paket tersedia
-              {country.hasUnlimitedPackages && " • Unlimited tersedia"}
-            </p>
-          </div>
-        </div>
-
-        {/* Packages */}
-        <CountryPackages
-          packages={packages as EsimPackage[]}
-          countryName={country.name}
-          priceSchedules={priceSchedules}
-        />
-      </div>
+      <CountryDetailContent
+        country={country}
+        packages={packages}
+        priceSchedules={priceSchedules}
+      />
     </Suspense>
   );
 }
