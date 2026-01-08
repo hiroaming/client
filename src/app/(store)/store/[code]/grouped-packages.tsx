@@ -139,7 +139,7 @@ export function GroupedPackages({
 
       {/* Grouped Packages */}
       <BorderedContainer>
-        <div className="space-y-8 py-2 px-1">
+        <div className="space-y-8 py-3 px-1">
           {displayDurations.map((duration) => {
             const pkgs = groupedPackages.get(duration) || [];
             if (pkgs.length === 0) return null;

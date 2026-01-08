@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BorderedContainer } from "@/components/bordered-container";
 import { GroupedPackages } from "./grouped-packages";
+import { UnlimitedPackages } from "./unlimited-packages";
 import type { EsimPackage } from "@/types/database";
 import type { PriceSchedule } from "@/lib/price-utils";
 import type { LocationWithPackageCount } from "@/services/locations";
@@ -37,7 +38,8 @@ export function CountryDetailContent({
   );
 
   // Determine which packages to display
-  const displayPackages = activeTab === "prepaid" ? fixedPackages : unlimitedPackages;
+  const displayPackages =
+    activeTab === "prepaid" ? fixedPackages : unlimitedPackages;
 
   return (
     <div className="flex flex-col w-full gap-12 -mt-24">
@@ -134,11 +136,19 @@ export function CountryDetailContent({
 
           {/* Packages */}
           <div className="mt-6">
-            <GroupedPackages
-              packages={hasFixed && hasUnlimited ? displayPackages : packages}
-              countryName={country.name}
-              priceSchedules={priceSchedules}
-            />
+            {activeTab === "prepaid" ? (
+              <GroupedPackages
+                packages={hasFixed && hasUnlimited ? displayPackages : packages}
+                countryName={country.name}
+                priceSchedules={priceSchedules}
+              />
+            ) : (
+              <UnlimitedPackages
+                packages={displayPackages}
+                countryName={country.name}
+                priceSchedules={priceSchedules}
+              />
+            )}
           </div>
         </div>
       </div>
