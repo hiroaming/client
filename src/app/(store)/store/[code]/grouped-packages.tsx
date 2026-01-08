@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Wifi, ShoppingCart } from "lucide-react";
+import { Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { FloatingPackageBar } from "@/components/floating-package-bar";
 import { useCartStore } from "@/stores/cart-store";
 import { useCurrencyStore } from "@/stores/currency-store";
 import { formatDataSize } from "@/lib/utils";
@@ -67,6 +68,10 @@ export function GroupedPackages({
   const [selectedDuration, setSelectedDuration] = useState<number | "all">(
     "all",
   );
+  const [selectedPackage, setSelectedPackage] = useState<EsimPackage | null>(
+    null,
+  );
+  const [quantity, setQuantity] = useState(1);
 
   const groupedPackages = useMemo(
     () => groupPackagesByDuration(packages),
@@ -93,10 +98,49 @@ export function GroupedPackages({
     return priceMap;
   }, [packages, priceSchedules]);
 
-  const handleAddToCart = (pkg: EsimPackage) => {
-    addItem(pkg);
-    toast.success(`${pkg.display_name || pkg.name} ditambahkan ke keranjang`);
+  const handlePackageClick = (pkg: EsimPackage) => {
+    setSelectedPackage(pkg);
+    setQuantity(1);
   };
+
+  const handleAddToCart = () => {
+    if (!selectedPackage) return;
+    for (let i = 0; i < quantity; i++) {
+      addItem(selectedPackage);
+    }
+    toast.success(
+      `${quantity}x ${selectedPackage.display_name || selectedPackage.name} ditambahkan ke keranjang`,
+    );
+    setSelectedPackage(null);
+    setQuantity(1);
+  };
+
+  const handleClose = () => {
+    setSelectedPackage(null);
+    setQuantity(1);
+  };
+
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
+
+  const handleCheckout = () => {
+    handleAddToCart();
+    // Navigate to checkout would go here
+  };
+
+  // Calculate total price for floating bar
+  const totalPrice = useMemo(() => {
+    if (!selectedPackage) return 0;
+    const effectivePrice = packagePrices.get(selectedPackage.id);
+    if (!effectivePrice) return 0;
+
+    const pricePerUnit =
+      currency === "USD"
+        ? effectivePrice.finalUsdCents / 100
+        : effectivePrice.finalIdr;
+
+    return pricePerUnit * quantity;
+  }, [selectedPackage, packagePrices, currency, quantity]);
 
   // Filter durations to display based on selection
   const displayDurations =
@@ -165,7 +209,8 @@ export function GroupedPackages({
                         pkg={pkg}
                         effectivePrice={effectivePrice}
                         formatted={formatted}
-                        onAddToCart={handleAddToCart}
+                        onPackageClick={handlePackageClick}
+                        isSelected={selectedPackage?.id === pkg.id}
                       />
                     );
                   })}
@@ -183,6 +228,20 @@ export function GroupedPackages({
           </p>
         </div>
       )}
+
+      {/* Floating Bottom Bar */}
+      {selectedPackage && (
+        <FloatingPackageBar
+          selectedPackage={selectedPackage}
+          quantity={quantity}
+          totalPrice={totalPrice}
+          currency={currency}
+          onIncrement={incrementQuantity}
+          onDecrement={decrementQuantity}
+          onAddToCart={handleAddToCart}
+          onCheckout={handleCheckout}
+        />
+      )}
     </div>
   );
 }
@@ -192,12 +251,14 @@ function PackageCard({
   pkg,
   effectivePrice,
   formatted,
-  onAddToCart,
+  onPackageClick,
+  isSelected,
 }: {
   pkg: EsimPackage;
   effectivePrice: ReturnType<typeof calculateEffectivePrice> | undefined;
   formatted: ReturnType<typeof formatPriceWithDiscount> | null;
-  onAddToCart: (pkg: EsimPackage) => void;
+  onPackageClick: (pkg: EsimPackage) => void;
+  isSelected: boolean;
 }) {
   // Determine badge type
   const getBadge = () => {
@@ -226,8 +287,11 @@ function PackageCard({
   return (
     <button
       type="button"
-      onClick={() => onAddToCart(pkg)}
-      className="group w-full text-left bg-white rounded-2xl border border-border p-5 hover:border-primary/40 hover:shadow-md transition-all flex flex-col min-h-[100px]"
+      onClick={() => onPackageClick(pkg)}
+      className={[
+        "group w-full text-left bg-white rounded-2xl border p-5 hover:border-primary/40 hover:shadow-md transition-all flex flex-col min-h-[100px]",
+        isSelected ? "border-primary border-2 shadow-md" : "border-border",
+      ].join(" ")}
     >
       {/* Top row - Badge and Price label */}
       <div className="flex items-start justify-between gap-4 mb-auto">

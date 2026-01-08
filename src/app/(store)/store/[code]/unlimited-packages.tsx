@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Wifi, Clock, ShoppingCart, Minus, Plus } from "lucide-react";
+import { Wifi, Clock, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BorderedContainer } from "@/components/bordered-container";
+import { NumericStepper } from "@/components/numeric-stepper";
 import { useCartStore } from "@/stores/cart-store";
 import { useCurrencyStore } from "@/stores/currency-store";
 import { formatDataSize } from "@/lib/utils";
@@ -148,31 +149,15 @@ export function UnlimitedPackages({
                   </p>
                 </div>
 
-                <div className="flex items-center shrink-0 border border-2 rounded-lg overflow-hidden">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={decrementDays}
-                    disabled={days <= 1}
-                    className="rounded-none h-8 w-8 border-r-2"
-                  >
-                    <Minus className="h-2 w-2" />
-                  </Button>
-                  <div className="min-w-[80px] text-center px-4">
-                    <span className="text-sm">{days} Days</span>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={incrementDays}
-                    disabled={days >= 365}
-                    className="rounded-none h-8 w-8 border-l-2"
-                  >
-                    <Plus className="h-2 w-2" />
-                  </Button>
-                </div>
+                <NumericStepper
+                  value={days}
+                  onIncrement={incrementDays}
+                  onDecrement={decrementDays}
+                  min={1}
+                  max={365}
+                  label="Days"
+                  size="sm"
+                />
               </div>
             </div>
 
@@ -251,7 +236,7 @@ export function UnlimitedPackages({
           </div>
 
           {/* Right side - Plan Summary */}
-          <div className="space-y-4 bg-white bg-white rounded-3xl p-6 self-start">
+          <div className="space-y-4 bg-white rounded-3xl p-6 self-start">
             <h2 className="text-2xl font-medium">Plan summary</h2>
 
             {selectedPackage && (
@@ -264,7 +249,7 @@ export function UnlimitedPackages({
                 <div className="flex items-center gap-2">
                   <Wifi className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <span className="text-2xl font-semibold">
+                    <span className="text-2xl font-medium">
                       {formatDataSize(selectedPackage.volume_bytes)}
                     </span>
                     <span className="text-muted-foreground text-lg">
@@ -277,20 +262,42 @@ export function UnlimitedPackages({
                 {/* Duration */}
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-2xl font-semibold">{days} Days</span>
+                  <span className="text-2xl font-medium">{days} Days</span>
                 </div>
 
-                {/* Price and Checkout */}
-                <div className="flex items-center justify-between pt-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Price</p>
-                    <p className="text-3xl font-semibold">{totalPrice}</p>
-                  </div>
+                {/* Price */}
+                <div className="pt-4">
+                  <p className="text-sm text-muted-foreground mb-1">Price</p>
+                  <p className="text-3xl font-medium">{totalPrice}</p>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-border pt-4" />
+
+                {/* Stepper and Action Buttons */}
+                <div className="flex flex-row items-stretch md:items-center gap-3">
+                  <NumericStepper
+                    value={1}
+                    onIncrement={() => {}}
+                    onDecrement={() => {}}
+                    min={1}
+                    size="sm"
+                  />
+                  <div className="flex-1" />
                   <Button
+                    type="button"
+                    variant="outline"
                     onClick={handleAddToCart}
-                    className="rounded-full bg-white border text-foreground h-16 w-16"
+                    className="md:flex-none rounded-full md:min-w-[120px]"
                   >
-                    <ShoppingCart className="h-4 w-4" />
+                    Add to Cart
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleAddToCart}
+                    className="md:flex-none rounded-full bg-teal-600 hover:bg-teal-700 md:min-w-[120px]"
+                  >
+                    Checkout {totalPrice}
                   </Button>
                 </div>
               </>
