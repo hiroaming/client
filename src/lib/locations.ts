@@ -1,5 +1,203 @@
 import type { Location, Country, Region } from "@/types/location";
 
+// Country code to name mapping
+export const COUNTRY_NAMES: Record<string, string> = {
+  // Popular countries
+  JP: "Japan",
+  KR: "South Korea",
+  TH: "Thailand",
+  SG: "Singapore",
+  MY: "Malaysia",
+  ID: "Indonesia",
+  US: "United States",
+  GB: "United Kingdom",
+  AU: "Australia",
+  FR: "France",
+  DE: "Germany",
+  IT: "Italy",
+
+  // Asia
+  CN: "China",
+  HK: "Hong Kong",
+  TW: "Taiwan",
+  VN: "Vietnam",
+  PH: "Philippines",
+  IN: "India",
+  KH: "Cambodia",
+  LA: "Laos",
+  MM: "Myanmar",
+  BN: "Brunei",
+  MO: "Macau",
+  NP: "Nepal",
+  BD: "Bangladesh",
+  LK: "Sri Lanka",
+  PK: "Pakistan",
+  MV: "Maldives",
+  MN: "Mongolia",
+  KZ: "Kazakhstan",
+  UZ: "Uzbekistan",
+  KG: "Kyrgyzstan",
+  TJ: "Tajikistan",
+  TM: "Turkmenistan",
+
+  // Europe
+  ES: "Spain",
+  PT: "Portugal",
+  NL: "Netherlands",
+  BE: "Belgium",
+  CH: "Switzerland",
+  AT: "Austria",
+  SE: "Sweden",
+  NO: "Norway",
+  DK: "Denmark",
+  FI: "Finland",
+  IS: "Iceland",
+  IE: "Ireland",
+  PL: "Poland",
+  CZ: "Czech Republic",
+  HU: "Hungary",
+  GR: "Greece",
+  RO: "Romania",
+  BG: "Bulgaria",
+  HR: "Croatia",
+  SI: "Slovenia",
+  SK: "Slovakia",
+  LT: "Lithuania",
+  LV: "Latvia",
+  EE: "Estonia",
+  RS: "Serbia",
+  BA: "Bosnia and Herzegovina",
+  ME: "Montenegro",
+  MK: "North Macedonia",
+  AL: "Albania",
+  XK: "Kosovo",
+  MD: "Moldova",
+  UA: "Ukraine",
+  BY: "Belarus",
+  RU: "Russia",
+  TR: "Turkey",
+  CY: "Cyprus",
+  MT: "Malta",
+  LU: "Luxembourg",
+  LI: "Liechtenstein",
+  MC: "Monaco",
+  SM: "San Marino",
+  VA: "Vatican City",
+  AD: "Andorra",
+
+  // North America
+  CA: "Canada",
+  MX: "Mexico",
+
+  // Central America & Caribbean
+  GT: "Guatemala",
+  BZ: "Belize",
+  SV: "El Salvador",
+  HN: "Honduras",
+  NI: "Nicaragua",
+  CR: "Costa Rica",
+  PA: "Panama",
+  CU: "Cuba",
+  JM: "Jamaica",
+  HT: "Haiti",
+  DO: "Dominican Republic",
+  PR: "Puerto Rico",
+  TT: "Trinidad and Tobago",
+  BB: "Barbados",
+  BS: "Bahamas",
+  LC: "Saint Lucia",
+  GD: "Grenada",
+  VC: "Saint Vincent and the Grenadines",
+  AG: "Antigua and Barbuda",
+  DM: "Dominica",
+  KN: "Saint Kitts and Nevis",
+
+  // South America
+  BR: "Brazil",
+  AR: "Argentina",
+  CL: "Chile",
+  PE: "Peru",
+  CO: "Colombia",
+  VE: "Venezuela",
+  EC: "Ecuador",
+  BO: "Bolivia",
+  PY: "Paraguay",
+  UY: "Uruguay",
+  GY: "Guyana",
+  SR: "Suriname",
+  GF: "French Guiana",
+
+  // Middle East
+  AE: "United Arab Emirates",
+  SA: "Saudi Arabia",
+  QA: "Qatar",
+  KW: "Kuwait",
+  OM: "Oman",
+  BH: "Bahrain",
+  IL: "Israel",
+  JO: "Jordan",
+  LB: "Lebanon",
+  IQ: "Iraq",
+  SY: "Syria",
+  YE: "Yemen",
+  PS: "Palestine",
+  IR: "Iran",
+
+  // Africa
+  ZA: "South Africa",
+  EG: "Egypt",
+  MA: "Morocco",
+  TN: "Tunisia",
+  DZ: "Algeria",
+  LY: "Libya",
+  KE: "Kenya",
+  TZ: "Tanzania",
+  UG: "Uganda",
+  RW: "Rwanda",
+  ET: "Ethiopia",
+  GH: "Ghana",
+  NG: "Nigeria",
+  SN: "Senegal",
+  CI: "Ivory Coast",
+  CM: "Cameroon",
+  ZW: "Zimbabwe",
+  BW: "Botswana",
+  NA: "Namibia",
+  MZ: "Mozambique",
+  ZM: "Zambia",
+  MW: "Malawi",
+  AO: "Angola",
+  MU: "Mauritius",
+  SC: "Seychelles",
+  RE: "Réunion",
+  MG: "Madagascar",
+
+  // Oceania
+  NZ: "New Zealand",
+  FJ: "Fiji",
+  PG: "Papua New Guinea",
+  NC: "New Caledonia",
+  PF: "French Polynesia",
+  WS: "Samoa",
+  TO: "Tonga",
+  VU: "Vanuatu",
+  SB: "Solomon Islands",
+  GU: "Guam",
+  MP: "Northern Mariana Islands",
+  AS: "American Samoa",
+  FM: "Micronesia",
+  MH: "Marshall Islands",
+  PW: "Palau",
+  KI: "Kiribati",
+  TV: "Tuvalu",
+  NR: "Nauru",
+};
+
+// Get country name by code
+export function getCountryName(countryCode: string): string {
+  return COUNTRY_NAMES[countryCode.toUpperCase()] || countryCode;
+}
+
 // Popular countries for featured section
 export const POPULAR_COUNTRY_CODES = [
   "JP", // Japan
@@ -127,7 +325,7 @@ export function getFlagUrl(countryCode: string): string {
 // Returns the logo URL from DB or falls back to local flag
 export function getLocationImageUrl(
   logoUrl: string | undefined | null,
-  countryCode: string
+  countryCode: string,
 ): string {
   // If we have a logo URL from the API/DB
   if (logoUrl) {
@@ -162,7 +360,7 @@ export function sortLocations<T extends Location>(locations: T[]): T[] {
 
 // Group countries by first letter for alphabet navigation
 export function groupCountriesByLetter(
-  countries: Country[]
+  countries: Country[],
 ): Record<string, Country[]> {
   const grouped: Record<string, Country[]> = {};
 
@@ -185,7 +383,7 @@ export function groupCountriesByLetter(
 // Filter locations by search query
 export function filterLocations<T extends Location>(
   locations: T[],
-  query: string
+  query: string,
 ): T[] {
   if (!query.trim()) return locations;
 
@@ -193,6 +391,6 @@ export function filterLocations<T extends Location>(
   return locations.filter(
     (location) =>
       location.name.toLowerCase().includes(lowerQuery) ||
-      location.code.toLowerCase().includes(lowerQuery)
+      location.code.toLowerCase().includes(lowerQuery),
   );
 }

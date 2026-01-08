@@ -5,6 +5,7 @@ import {
   REGIONS,
   getLocationImageUrl,
   getRegionCodeFromSlug,
+  getCountryName,
 } from "@/lib/locations";
 
 export interface LocationWithPackageCount extends Country {
@@ -21,11 +22,6 @@ export interface RegionWithPackageCount extends Region {
   minPriceIdr: number;
 }
 
-interface LocationNameData {
-  name: string;
-  logo: string;
-}
-
 interface PackageLocationData {
   slug: string;
   name: string;
@@ -33,7 +29,6 @@ interface PackageLocationData {
   price_usd_cents: number;
   price_idr: number;
   data_type: number | null;
-  location_names: Record<string, LocationNameData> | null;
   image_url: string | null;
 }
 
@@ -47,7 +42,7 @@ export async function getCountriesWithPackages(): Promise<
   const { data, error } = await supabase
     .from("esim_packages")
     .select(
-      "slug, name, location_codes, price_usd_cents, price_idr, data_type, location_names, image_url",
+      "slug, name, location_codes, price_usd_cents, price_idr, data_type, image_url",
     )
     .eq("is_active", true);
 
@@ -76,20 +71,12 @@ export async function getCountriesWithPackages(): Promise<
     if (pkg.location_codes?.length !== 1) return;
 
     const code = pkg.location_codes[0];
-    const countryName = extractCountryNameFromPackage(pkg.name);
+    const countryName = getCountryName(code);
     const isUnlimited =
       pkg.data_type === 2 || pkg.data_type === 3 || pkg.data_type === 4;
 
-    // Extract logo URL from location_names or image_url
-    let logoUrl: string | null = pkg.image_url || null;
-    if (!logoUrl && pkg.location_names) {
-      // Try to find logo from location_names JSON
-      const locationData =
-        pkg.location_names[code] || Object.values(pkg.location_names)[0];
-      if (locationData?.logo) {
-        logoUrl = locationData.logo;
-      }
-    }
+    // Extract logo URL from image_url
+    const logoUrl: string | null = pkg.image_url || null;
 
     const existing = countryMap.get(code);
     if (existing) {
@@ -150,7 +137,7 @@ export async function getRegionsWithPackages(): Promise<
   const { data, error } = await supabase
     .from("esim_packages")
     .select(
-      "slug, name, location_codes, price_usd_cents, price_idr, data_type, location_names, image_url",
+      "slug, name, location_codes, price_usd_cents, price_idr, data_type, image_url",
     )
     .eq("is_active", true);
 
@@ -282,15 +269,4 @@ export async function getRegionByCode(
 ): Promise<RegionWithPackageCount | null> {
   const regions = await getRegionsWithPackages();
   return regions.find((r) => r.code === code) || null;
-}
-
-// Helper to extract country name from package name
-function extractCountryNameFromPackage(packageName: string): string {
-  // Remove data spec from end (e.g., "Japan 1GB 7Days" -> "Japan")
-  // Handle various patterns
-  return packageName
-    .replace(/\s+\d+(\.\d+)?(GB|MB)\/Day.*$/i, "") // "Japan 1GB/Day" -> "Japan"
-    .replace(/\s+\d+(\.\d+)?(GB|MB)\s+\d+Days.*$/i, "") // "Japan 1GB 7Days" -> "Japan"
-    .replace(/\s+Unlimited.*$/i, "") // "Japan Unlimited 7Days" -> "Japan"
-    .trim();
 }
